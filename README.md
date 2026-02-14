@@ -26,8 +26,10 @@ Google Apps Script add-on that lets users look up and insert Quran ayahs and Had
 3. Delete any existing code in `Code.gs`, paste the contents of `Code.gs` from this project
 4. Click **+** next to Files > **HTML** > name it `Sidebar` (not Sidebar.html, the extension is auto-added)
 5. Paste the contents of `Sidebar.html`
-6. Click **Save**, then close the Apps Script tab
-7. Reload your Google Doc -- you will see a new **Quran & Hadith** menu
+6. In the Apps Script editor, go to **Project Settings** (gear icon) > check **Show "appsscript.json" manifest file in editor**
+7. Open `appsscript.json` and replace its contents with the `appsscript.json` from this project
+8. Click **Save**, then close the Apps Script tab
+9. Reload your Google Doc -- you will see a new **Quran & Hadith** menu
 
 ## Usage
 
