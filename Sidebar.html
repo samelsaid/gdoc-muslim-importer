@@ -42,13 +42,101 @@
     .validation-error { font-size: 10px; color: #d32f2f; margin-top: -5px; margin-bottom: 5px; display: none; }
     input.invalid, select.invalid { border-color: #d32f2f; box-shadow: 0 0 0 2px rgba(211,47,47,0.15); }
     button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .settings-panel { padding: 10px 0; border-bottom: 1px solid #e0e0e0; margin-bottom: 12px; }
+    .settings-panel h3 { border: none; margin: 0; padding: 0; font-size: 13px; }
+    .settings-toggle { cursor: pointer; display: flex; align-items: center; gap: 6px; user-select: none; padding: 4px 0; }
+    .settings-toggle:hover { color: #1a5276; }
+    .settings-toggle .arrow { font-size: 10px; color: #888; }
+    .settings-body { display: none; padding-top: 10px; }
+    .settings-body.open { display: block; }
+    .settings-group { margin-bottom: 10px; }
+    .settings-group-title { font-size: 11px; font-weight: 600; color: #1a5276; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .api-key-row { display: flex; gap: 6px; align-items: flex-start; }
+    .api-key-row input { flex: 1; margin-bottom: 0; }
+    .api-key-row button { flex-shrink: 0; margin-top: 0; }
+    .api-key-section { display: none; }
+    .api-key-section.visible { display: block; }
+    .checkbox-row { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+    .checkbox-row input[type="checkbox"] { width: auto; margin: 0; }
+    .checkbox-row label { display: inline; margin: 0; }
+    .settings-status { font-size: 10px; margin-top: 4px; }
+    .settings-status.success { color: #155724; }
+    .settings-status.error { color: #721c24; }
+    .status-badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 3px; color: #fff; margin-left: 6px; vertical-align: middle; }
+    .status-badge.sahih { background: #2e7d32; }
+    .status-badge.hasan { background: #e65100; }
+    .status-badge.daif { background: #c62828; }
+    select:disabled, input:disabled { background: #f0f0f0; color: #999; }
   </style>
 </head>
 <body>
 
+  <!-- ── SETTINGS PANEL ── -->
+  <div class="settings-panel">
+    <div class="settings-toggle" onclick="toggleSettings()">
+      <span>&#9881;</span>
+      <h3>Settings</h3>
+      <span class="arrow" id="settingsArrow">&#9660;</span>
+    </div>
+    <div class="settings-body" id="settingsBody">
+
+      <div class="settings-group">
+        <div class="settings-group-title">Translation</div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="showTranslation" checked onchange="onTranslationToggle()" />
+          <label for="showTranslation">Show translation alongside Arabic</label>
+        </div>
+        <label>Quran Translation</label>
+        <select id="quranTranslation">
+          <option value="en.sahih">English — Sahih International</option>
+          <option value="en.pickthall">English — Pickthall</option>
+          <option value="en.yusufali">English — Yusuf Ali</option>
+          <option value="en.hilali">English — Hilali &amp; Khan</option>
+          <option value="en.itani">English — Clear Quran / Itani</option>
+          <option value="fr.hamidullah">French — Hamidullah</option>
+          <option value="es.cortes">Spanish — Cortes</option>
+          <option value="tr.diyanet">Turkish — Diyanet</option>
+          <option value="ur.jalandhry">Urdu — Jalandhry</option>
+          <option value="ur.maududi">Urdu — Maududi</option>
+          <option value="id.indonesian">Indonesian</option>
+          <option value="ru.kuliev">Russian — Kuliev</option>
+          <option value="de.bubenheim">German — Bubenheim</option>
+          <option value="ms.basmeih">Malay — Basmeih</option>
+          <option value="bn.bengali">Bengali</option>
+        </select>
+        <label>Hadith Translation</label>
+        <select id="hadithTranslation">
+          <option value="english">English</option>
+        </select>
+      </div>
+
+      <div class="settings-group">
+        <div class="settings-group-title">Hadith Source</div>
+        <label>Source</label>
+        <select id="hadithSource" onchange="onSourceChange()">
+          <option value="fawazahmed0">fawazahmed0 (free)</option>
+          <option value="hadithapi">hadithapi.com</option>
+        </select>
+        <div class="api-key-section" id="apiKeySection">
+          <label>API Key</label>
+          <div class="api-key-row">
+            <input type="password" id="hadithApiKey" placeholder="Enter your API key" />
+            <button class="btn-secondary btn-small" id="btnTestApiKey" onclick="testApiKey()">Test</button>
+          </div>
+          <div class="help">Get a free key at hadithapi.com</div>
+          <div class="settings-status" id="apiKeyStatus"></div>
+        </div>
+      </div>
+
+      <button class="btn-primary" id="btnSaveSettings" onclick="saveSettings()" style="margin-top:4px;">Save Settings</button>
+      <div class="settings-status" id="settingsStatus"></div>
+    </div>
+  </div>
+
   <!-- ── QURAN SECTION ── -->
   <div class="section">
-    <h2>📖 Quran</h2>
+    <h2>Quran</h2>
     <div class="row">
       <div>
         <label>Surah (1-114)</label>
@@ -60,6 +148,11 @@
         <input type="number" id="ayah" min="1" value="255" oninput="validateQuranInputs()" />
         <div class="validation-error" id="ayahError"></div>
       </div>
+      <div>
+        <label>End (opt.)</label>
+        <input type="number" id="ayahEnd" min="1" value="" placeholder="257" oninput="validateQuranInputs()" />
+        <div class="validation-error" id="ayahEndError"></div>
+      </div>
     </div>
 
     <button class="btn-primary" id="btnLookupAyah" onclick="lookupAyah()">Look Up Ayah</button>
@@ -67,12 +160,12 @@
     <div id="quranPreview" class="preview">
       <div class="ref" id="quranRef"></div>
       <div class="arabic" id="quranArabic"></div>
-      <div class="english" id="quranEnglish"></div>
+      <div class="english" id="quranTranslationText"></div>
 
       <div class="nav-row">
-        <button class="btn-secondary btn-small" onclick="prevAyah()">◀ Previous</button>
-        <button class="btn-primary btn-small" onclick="insertAyah()">Insert into Doc</button>
-        <button class="btn-secondary btn-small" onclick="nextAyah()">Next ▶</button>
+        <button class="btn-secondary btn-small" id="btnPrevAyah" onclick="prevAyah()">&#9664; Previous</button>
+        <button class="btn-primary btn-small" id="btnInsertAyah" onclick="insertAyah()">Insert into Doc</button>
+        <button class="btn-secondary btn-small" id="btnNextAyah" onclick="nextAyah()">Next &#9654;</button>
       </div>
     </div>
 
@@ -81,7 +174,7 @@
 
   <!-- ── HADITH SECTION ── -->
   <div class="section">
-    <h2>📜 Hadith</h2>
+    <h2>Hadith</h2>
     <label>Collection</label>
     <select id="hadithCollection" onchange="validateHadithInputs()">
       <option value="bukhari">Sahih al-Bukhari</option>
@@ -102,15 +195,17 @@
     <div id="hadithPreview" class="preview">
       <div class="ref" id="hadithRef"></div>
       <div class="arabic" id="hadithArabic"></div>
-      <div class="english" id="hadithEnglish"></div>
+      <div class="english" id="hadithTranslationText"></div>
 
       <div class="nav-row">
-        <button class="btn-primary btn-small" onclick="insertHadith()">Insert into Doc</button>
+        <button class="btn-secondary btn-small" id="btnPrevHadith" onclick="prevHadith()">&#9664; Previous</button>
+        <button class="btn-primary btn-small" id="btnInsertHadith" onclick="insertHadith()">Insert into Doc</button>
+        <button class="btn-secondary btn-small" id="btnNextHadith" onclick="nextHadith()">Next &#9654;</button>
       </div>
     </div>
 
     <div id="hadithStatus" class="status"></div>
-    <div class="collections">
+    <div class="collections" id="collectionsHelp">
       <strong>Shorthand:</strong> bukhari, muslim, abudawud, tirmidhi, nasai, ibnmajah, malik
     </div>
   </div>
@@ -118,12 +213,262 @@
   <!-- ── INLINE TAG SCANNER ── -->
   <div class="section">
     <h3>Inline Tag Scanner</h3>
-    <p class="help">Type <code>/quran 2:255</code> or <code>/hadith bukhari:1</code> anywhere in your doc, then click below to auto-replace all tags with formatted text.</p>
-    <button class="btn-primary" onclick="scanDoc()" style="margin-top:8px;">Scan & Replace All Tags</button>
+    <p class="help">Type <code>/quran 2:255</code>, <code>/quran 2:255-257</code>, or <code>/hadith bukhari:1</code> anywhere in your doc, then click below to auto-replace all tags with formatted text.</p>
+    <button class="btn-primary" id="btnScanReplace" onclick="scanDoc()" style="margin-top:8px;">Scan & Replace All Tags</button>
   </div>
 
 <script>
   var currentAyahData = null;
+  var currentHadithData = null;
+  var quranLoading = false;
+  var hadithLoading = false;
+  var currentPrefs = {
+    showTranslation: true,
+    quranTranslation: 'en.sahih',
+    hadithSource: 'fawazahmed0',
+    hadithApiKey: '',
+    hadithTranslation: 'english'
+  };
+
+  // ── Settings ──
+
+  function toggleSettings() {
+    var body = document.getElementById('settingsBody');
+    var arrow = document.getElementById('settingsArrow');
+    if (body.className.indexOf('open') !== -1) {
+      body.className = 'settings-body';
+      arrow.innerHTML = '&#9660;';
+    } else {
+      body.className = 'settings-body open';
+      arrow.innerHTML = '&#9650;';
+    }
+  }
+
+  function loadSettings() {
+    google.script.run
+      .withSuccessHandler(function(prefs) {
+        currentPrefs = prefs;
+        document.getElementById('showTranslation').checked = prefs.showTranslation;
+        document.getElementById('quranTranslation').value = prefs.quranTranslation;
+        document.getElementById('hadithSource').value = prefs.hadithSource;
+        document.getElementById('hadithApiKey').value = prefs.hadithApiKey || '';
+        applySourceUI(prefs.hadithSource);
+        updateHadithTranslationDropdown(prefs.hadithSource);
+        document.getElementById('hadithTranslation').value = prefs.hadithTranslation;
+        updateCollectionDropdown(prefs.hadithSource);
+        onTranslationToggle();
+      })
+      .withFailureHandler(function() {
+        // Use defaults already set in currentPrefs
+        onTranslationToggle();
+      })
+      .getPrefs();
+  }
+
+  function saveSettings() {
+    var btn = document.getElementById('btnSaveSettings');
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+    setSettingsStatus('settingsStatus', '', '');
+
+    var prefs = {
+      showTranslation: document.getElementById('showTranslation').checked,
+      quranTranslation: document.getElementById('quranTranslation').value,
+      hadithSource: document.getElementById('hadithSource').value,
+      hadithApiKey: document.getElementById('hadithApiKey').value,
+      hadithTranslation: document.getElementById('hadithTranslation').value
+    };
+
+    google.script.run
+      .withSuccessHandler(function(saved) {
+        currentPrefs = saved;
+        btn.disabled = false;
+        btn.textContent = 'Save Settings';
+        setSettingsStatus('settingsStatus', 'Settings saved!', 'success');
+      })
+      .withFailureHandler(function(err) {
+        btn.disabled = false;
+        btn.textContent = 'Save Settings';
+        setSettingsStatus('settingsStatus', err.message, 'error');
+      })
+      .savePrefs(prefs);
+  }
+
+  function testApiKey() {
+    var apiKey = document.getElementById('hadithApiKey').value.trim();
+    if (!apiKey) {
+      setSettingsStatus('apiKeyStatus', 'Please enter an API key first.', 'error');
+      return;
+    }
+    var btn = document.getElementById('btnTestApiKey');
+    btn.disabled = true;
+    btn.textContent = 'Testing...';
+    setSettingsStatus('apiKeyStatus', '', '');
+
+    google.script.run
+      .withSuccessHandler(function() {
+        btn.disabled = false;
+        btn.textContent = 'Test';
+        setSettingsStatus('apiKeyStatus', 'API key is valid!', 'success');
+      })
+      .withFailureHandler(function(err) {
+        btn.disabled = false;
+        btn.textContent = 'Test';
+        setSettingsStatus('apiKeyStatus', err.message, 'error');
+      })
+      .testHadithApiKey(apiKey);
+  }
+
+  function onSourceChange() {
+    var source = document.getElementById('hadithSource').value;
+    applySourceUI(source);
+    updateHadithTranslationDropdown(source);
+    updateCollectionDropdown(source);
+  }
+
+  function applySourceUI(source) {
+    var section = document.getElementById('apiKeySection');
+    if (source === 'hadithapi') {
+      section.className = 'api-key-section visible';
+    } else {
+      section.className = 'api-key-section';
+    }
+  }
+
+  function onTranslationToggle() {
+    var checked = document.getElementById('showTranslation').checked;
+    document.getElementById('quranTranslation').disabled = !checked;
+    document.getElementById('hadithTranslation').disabled = !checked;
+  }
+
+  function updateCollectionDropdown(source) {
+    google.script.run
+      .withSuccessHandler(function(collections) {
+        var select = document.getElementById('hadithCollection');
+        var currentVal = select.value;
+        select.innerHTML = '';
+        var shorthandParts = [];
+        for (var i = 0; i < collections.length; i++) {
+          var opt = document.createElement('option');
+          opt.value = collections[i].value;
+          opt.textContent = collections[i].label;
+          select.appendChild(opt);
+          shorthandParts.push(collections[i].value);
+        }
+        // Try to preserve current selection
+        var found = false;
+        for (var j = 0; j < collections.length; j++) {
+          if (collections[j].value === currentVal) {
+            found = true;
+            break;
+          }
+        }
+        if (found) {
+          select.value = currentVal;
+        }
+        // Update shorthand help text
+        document.getElementById('collectionsHelp').innerHTML =
+          '<strong>Shorthand:</strong> ' + shorthandParts.join(', ');
+      })
+      .withFailureHandler(function() {
+        // Keep existing dropdown on failure
+      })
+      .getCollectionsForSource(source);
+  }
+
+  function updateHadithTranslationDropdown(source) {
+    var select = document.getElementById('hadithTranslation');
+    var currentVal = select.value;
+    select.innerHTML = '';
+
+    var engOpt = document.createElement('option');
+    engOpt.value = 'english';
+    engOpt.textContent = 'English';
+    select.appendChild(engOpt);
+
+    if (source === 'hadithapi') {
+      var urduOpt = document.createElement('option');
+      urduOpt.value = 'urdu';
+      urduOpt.textContent = 'Urdu';
+      select.appendChild(urduOpt);
+    }
+
+    // If urdu was selected but source switched to fawazahmed0, reset to english
+    if (currentVal === 'urdu' && source !== 'hadithapi') {
+      select.value = 'english';
+    } else {
+      select.value = currentVal;
+    }
+  }
+
+  function setSettingsStatus(id, msg, type) {
+    var el = document.getElementById(id);
+    el.textContent = msg;
+    el.className = 'settings-status' + (type ? ' ' + type : '');
+  }
+
+  // ── Loading Helpers ──
+
+  function setLoading(btnId, loadingText) {
+    var btn = document.getElementById(btnId);
+    btn.disabled = true;
+    btn._originalText = btn.textContent;
+    btn.textContent = loadingText || 'Loading...';
+  }
+
+  function clearLoading(btnId) {
+    var btn = document.getElementById(btnId);
+    btn.disabled = false;
+    if (btn._originalText) {
+      btn.textContent = btn._originalText;
+    }
+  }
+
+  function setQuranLoading(btnId, text) {
+    quranLoading = true;
+    setLoading(btnId, text);
+    var ids = ['btnPrevAyah', 'btnInsertAyah', 'btnNextAyah', 'btnLookupAyah'];
+    for (var i = 0; i < ids.length; i++) {
+      if (ids[i] !== btnId) {
+        document.getElementById(ids[i]).disabled = true;
+      }
+    }
+  }
+
+  function clearQuranLoading(btnId) {
+    quranLoading = false;
+    clearLoading(btnId);
+    var ids = ['btnPrevAyah', 'btnInsertAyah', 'btnNextAyah'];
+    for (var i = 0; i < ids.length; i++) {
+      if (ids[i] !== btnId) {
+        document.getElementById(ids[i]).disabled = false;
+      }
+    }
+    validateQuranInputs();
+  }
+
+  function setHadithLoading(btnId, text) {
+    hadithLoading = true;
+    setLoading(btnId, text);
+    var ids = ['btnPrevHadith', 'btnInsertHadith', 'btnNextHadith', 'btnLookupHadith'];
+    for (var i = 0; i < ids.length; i++) {
+      if (ids[i] !== btnId) {
+        document.getElementById(ids[i]).disabled = true;
+      }
+    }
+  }
+
+  function clearHadithLoading(btnId) {
+    hadithLoading = false;
+    clearLoading(btnId);
+    var ids = ['btnPrevHadith', 'btnInsertHadith', 'btnNextHadith'];
+    for (var i = 0; i < ids.length; i++) {
+      if (ids[i] !== btnId) {
+        document.getElementById(ids[i]).disabled = false;
+      }
+    }
+    validateHadithInputs();
+  }
 
   // ── Validation ──
 
@@ -145,6 +490,7 @@
     var valid = true;
     var surah = parseInt(document.getElementById('surah').value, 10);
     var ayah = parseInt(document.getElementById('ayah').value, 10);
+    var ayahEndVal = document.getElementById('ayahEnd').value.trim();
 
     if (isNaN(surah) || surah < 1 || surah > 114) {
       showFieldError('surah', 'surahError', 'Surah must be 1-114');
@@ -158,6 +504,21 @@
       valid = false;
     } else {
       showFieldError('ayah', 'ayahError', '');
+    }
+
+    if (ayahEndVal !== '') {
+      var endAyah = parseInt(ayahEndVal, 10);
+      if (isNaN(endAyah) || endAyah < ayah) {
+        showFieldError('ayahEnd', 'ayahEndError', 'Must be >= start ayah');
+        valid = false;
+      } else if (endAyah - ayah + 1 > 25) {
+        showFieldError('ayahEnd', 'ayahEndError', 'Max 25 ayahs');
+        valid = false;
+      } else {
+        showFieldError('ayahEnd', 'ayahEndError', '');
+      }
+    } else {
+      showFieldError('ayahEnd', 'ayahEndError', '');
     }
 
     var btn = document.getElementById('btnLookupAyah');
@@ -184,39 +545,104 @@
   // ── Quran ──
 
   function lookupAyah() {
-    if (!validateQuranInputs()) return;
+    if (!validateQuranInputs() || quranLoading) return;
     var surah = document.getElementById('surah').value;
     var ayah = document.getElementById('ayah').value;
+    var ayahEndVal = document.getElementById('ayahEnd').value.trim();
+    setQuranLoading('btnLookupAyah', 'Looking up...');
     setStatus('quranStatus', 'Loading...', '');
 
-    google.script.run
-      .withSuccessHandler(function(data) {
-        currentAyahData = data;
-        document.getElementById('quranRef').textContent = '﴾ ' + data.surahEnglish + ' ' + data.surahNum + ':' + data.ayahNum + ' ﴿';
-        document.getElementById('quranArabic').textContent = data.arabic;
-        document.getElementById('quranEnglish').textContent = data.english;
-        document.getElementById('quranPreview').style.display = 'block';
-
-        // Sync inputs
-        document.getElementById('surah').value = data.surahNum;
-        document.getElementById('ayah').value = data.ayahNum;
-        clearStatus('quranStatus');
-      })
-      .withFailureHandler(function(err) {
-        setStatus('quranStatus', err.message, 'error');
-        document.getElementById('quranPreview').style.display = 'none';
-      })
-      .fetchAyah(parseInt(surah), parseInt(ayah));
+    if (ayahEndVal !== '') {
+      google.script.run
+        .withSuccessHandler(function(ayahs) {
+          clearQuranLoading('btnLookupAyah');
+          currentAyahData = ayahs[0];
+          currentAyahData._rangeData = ayahs;
+          var refText = '﴾ ' + ayahs[0].surahEnglish + ' ' + ayahs[0].surahNum + ':' + ayahs[0].ayahNum + '-' + ayahs[ayahs.length - 1].ayahNum + ' ﴿';
+          document.getElementById('quranRef').textContent = refText;
+          var arabicParts = [];
+          var translationParts = [];
+          for (var i = 0; i < ayahs.length; i++) {
+            arabicParts.push('(' + ayahs[i].ayahNum + ') ' + ayahs[i].arabic);
+            var transText = ayahs[i].translation || ayahs[i].english || '';
+            if (transText) {
+              translationParts.push(ayahs[i].ayahNum + '. ' + transText);
+            }
+          }
+          document.getElementById('quranArabic').textContent = arabicParts.join(' ');
+          var translationEl = document.getElementById('quranTranslationText');
+          translationEl.textContent = translationParts.join(' ');
+          if (currentPrefs.showTranslation && translationParts.length > 0) {
+            translationEl.style.display = 'block';
+          } else {
+            translationEl.style.display = 'none';
+          }
+          document.getElementById('quranPreview').style.display = 'block';
+          document.getElementById('surah').value = ayahs[0].surahNum;
+          clearStatus('quranStatus');
+        })
+        .withFailureHandler(function(err) {
+          clearQuranLoading('btnLookupAyah');
+          setStatus('quranStatus', err.message, 'error');
+          document.getElementById('quranPreview').style.display = 'none';
+        })
+        .fetchAyahRange(parseInt(surah), parseInt(ayah), parseInt(ayahEndVal));
+    } else {
+      google.script.run
+        .withSuccessHandler(function(data) {
+          clearQuranLoading('btnLookupAyah');
+          currentAyahData = data;
+          currentAyahData._rangeData = null;
+          var refParts = '﴾ ' + data.surahEnglish + ' ' + data.surahNum + ':' + data.ayahNum + ' ﴿';
+          if (data.translationEdition && currentPrefs.showTranslation) {
+            refParts = refParts + ' [' + data.translationEdition + ']';
+          }
+          document.getElementById('quranRef').textContent = refParts;
+          document.getElementById('quranArabic').textContent = data.arabic;
+          var translationEl = document.getElementById('quranTranslationText');
+          var transText = data.translation || data.english || '';
+          translationEl.textContent = transText;
+          if (currentPrefs.showTranslation && transText) {
+            translationEl.style.display = 'block';
+          } else {
+            translationEl.style.display = 'none';
+          }
+          document.getElementById('quranPreview').style.display = 'block';
+          document.getElementById('surah').value = data.surahNum;
+          document.getElementById('ayah').value = data.ayahNum;
+          clearStatus('quranStatus');
+        })
+        .withFailureHandler(function(err) {
+          clearQuranLoading('btnLookupAyah');
+          setStatus('quranStatus', err.message, 'error');
+          document.getElementById('quranPreview').style.display = 'none';
+        })
+        .fetchAyah(parseInt(surah), parseInt(ayah));
+    }
   }
 
   function prevAyah() {
-    if (!currentAyahData) return;
+    if (!currentAyahData || quranLoading) return;
+    document.getElementById('ayahEnd').value = '';
     var s = currentAyahData.surahNum;
     var a = currentAyahData.ayahNum - 1;
     if (a < 1) {
-      // Go to previous surah's last ayah — just decrement surah, set ayah high
-      s = Math.max(1, s - 1);
-      a = 999; // API will clamp or error; user can adjust
+      if (s <= 1) return;
+      s = s - 1;
+      setQuranLoading('btnPrevAyah', 'Loading...');
+      google.script.run
+        .withSuccessHandler(function(count) {
+          clearQuranLoading('btnPrevAyah');
+          document.getElementById('surah').value = s;
+          document.getElementById('ayah').value = count;
+          lookupAyah();
+        })
+        .withFailureHandler(function(err) {
+          clearQuranLoading('btnPrevAyah');
+          setStatus('quranStatus', err.message, 'error');
+        })
+        .getSurahAyahCount(s);
+      return;
     }
     document.getElementById('surah').value = s;
     document.getElementById('ayah').value = a;
@@ -224,7 +650,8 @@
   }
 
   function nextAyah() {
-    if (!currentAyahData) return;
+    if (!currentAyahData || quranLoading) return;
+    document.getElementById('ayahEnd').value = '';
     var s = currentAyahData.surahNum;
     var a = currentAyahData.ayahNum + 1;
     if (a > currentAyahData.totalAyahs) {
@@ -237,53 +664,135 @@
   }
 
   function insertAyah() {
-    if (!currentAyahData) return;
+    if (!currentAyahData || quranLoading) return;
+    setQuranLoading('btnInsertAyah', 'Inserting...');
     setStatus('quranStatus', 'Inserting...', '');
-    google.script.run
-      .withSuccessHandler(function() {
-        setStatus('quranStatus', 'Inserted successfully!', 'success');
-      })
-      .withFailureHandler(function(err) {
-        setStatus('quranStatus', err.message, 'error');
-      })
-      .insertAyahAtCursor(currentAyahData.surahNum, currentAyahData.ayahNum);
+
+    if (currentAyahData._rangeData) {
+      var range = currentAyahData._rangeData;
+      google.script.run
+        .withSuccessHandler(function() {
+          clearQuranLoading('btnInsertAyah');
+          setStatus('quranStatus', 'Inserted ' + range.length + ' ayahs!', 'success');
+        })
+        .withFailureHandler(function(err) {
+          clearQuranLoading('btnInsertAyah');
+          setStatus('quranStatus', err.message, 'error');
+        })
+        .insertAyahRangeAtCursor(range[0].surahNum, range[0].ayahNum, range[range.length - 1].ayahNum);
+    } else {
+      google.script.run
+        .withSuccessHandler(function() {
+          clearQuranLoading('btnInsertAyah');
+          setStatus('quranStatus', 'Inserted successfully!', 'success');
+        })
+        .withFailureHandler(function(err) {
+          clearQuranLoading('btnInsertAyah');
+          setStatus('quranStatus', err.message, 'error');
+        })
+        .insertAyahAtCursor(currentAyahData.surahNum, currentAyahData.ayahNum);
+    }
   }
 
   // ── Hadith ──
 
   function lookupHadith() {
-    if (!validateHadithInputs()) return;
+    if (!validateHadithInputs() || hadithLoading) return;
     var col = document.getElementById('hadithCollection').value;
     var num = document.getElementById('hadithNum').value;
+    setHadithLoading('btnLookupHadith', 'Looking up...');
     setStatus('hadithStatus', 'Loading...', '');
 
     google.script.run
       .withSuccessHandler(function(data) {
-        document.getElementById('hadithRef').textContent =
-          '📖 ' + capitalize(data.collection) + ' — Hadith ' + data.hadithNum + ' (Book ' + data.reference.book + ', #' + data.reference.hadith + ')';
+        clearHadithLoading('btnLookupHadith');
+        currentHadithData = data;
+        var refHTML = 'Hadith ' + capitalize(data.collection) + ' #' + data.hadithNum;
+        if (data.reference && data.reference.book) {
+          refHTML = refHTML + ' (Book ' + data.reference.book + ', #' + data.reference.hadith + ')';
+        }
+        var refEl = document.getElementById('hadithRef');
+        refEl.textContent = refHTML;
+
+        // Status badge
+        if (data.status) {
+          var badge = document.createElement('span');
+          var statusLower = data.status.toLowerCase();
+          var badgeClass = 'status-badge';
+          if (statusLower === 'sahih') {
+            badgeClass = badgeClass + ' sahih';
+          } else if (statusLower === 'hasan') {
+            badgeClass = badgeClass + ' hasan';
+          } else {
+            badgeClass = badgeClass + ' daif';
+          }
+          badge.className = badgeClass;
+          badge.textContent = data.status;
+          refEl.appendChild(badge);
+        }
+
         document.getElementById('hadithArabic').textContent = data.arabic || '';
-        document.getElementById('hadithEnglish').textContent = data.english;
+
+        // Translation-aware display
+        var translationEl = document.getElementById('hadithTranslationText');
+        var translationText = '';
+        if (currentPrefs.hadithTranslation === 'urdu' && data.urdu) {
+          translationText = data.urdu;
+        } else if (currentPrefs.hadithTranslation === 'urdu' && !data.urdu) {
+          translationText = data.english || '';
+        } else {
+          translationText = data.english || '';
+        }
+        translationEl.textContent = translationText;
+
+        if (currentPrefs.showTranslation && translationText) {
+          translationEl.style.display = 'block';
+        } else {
+          translationEl.style.display = 'none';
+        }
+
         document.getElementById('hadithPreview').style.display = 'block';
+        document.getElementById('hadithCollection').value = data.collection;
+        document.getElementById('hadithNum').value = data.hadithNum;
         clearStatus('hadithStatus');
       })
       .withFailureHandler(function(err) {
+        clearHadithLoading('btnLookupHadith');
         setStatus('hadithStatus', err.message, 'error');
         document.getElementById('hadithPreview').style.display = 'none';
       })
       .fetchHadith(col, num);
   }
 
+  function prevHadith() {
+    if (!currentHadithData || hadithLoading) return;
+    var num = currentHadithData.hadithNum - 1;
+    if (num < 1) return;
+    document.getElementById('hadithNum').value = num;
+    lookupHadith();
+  }
+
+  function nextHadith() {
+    if (!currentHadithData || hadithLoading) return;
+    var num = currentHadithData.hadithNum + 1;
+    document.getElementById('hadithNum').value = num;
+    lookupHadith();
+  }
+
   function insertHadith() {
-    if (!validateHadithInputs()) return;
+    if (!currentHadithData || hadithLoading) return;
     var col = document.getElementById('hadithCollection').value;
     var num = document.getElementById('hadithNum').value;
+    setHadithLoading('btnInsertHadith', 'Inserting...');
     setStatus('hadithStatus', 'Inserting...', '');
 
     google.script.run
       .withSuccessHandler(function() {
+        clearHadithLoading('btnInsertHadith');
         setStatus('hadithStatus', 'Inserted successfully!', 'success');
       })
       .withFailureHandler(function(err) {
+        clearHadithLoading('btnInsertHadith');
         setStatus('hadithStatus', err.message, 'error');
       })
       .insertHadithAtCursor(col, num);
@@ -292,9 +801,15 @@
   // ── Scanner ──
 
   function scanDoc() {
+    setLoading('btnScanReplace', 'Scanning...');
     google.script.run
-      .withSuccessHandler(function() {})
-      .withFailureHandler(function(err) { alert(err.message); })
+      .withSuccessHandler(function() {
+        clearLoading('btnScanReplace');
+      })
+      .withFailureHandler(function(err) {
+        clearLoading('btnScanReplace');
+        alert(err.message);
+      })
       .scanAndReplace();
   }
 
@@ -310,6 +825,9 @@
     document.getElementById(id).style.display = 'none';
   }
   function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+  // ── Initialize ──
+  loadSettings();
 </script>
 
 </body>

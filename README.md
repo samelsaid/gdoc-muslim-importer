@@ -4,11 +4,16 @@ Google Apps Script add-on that lets users look up and insert Quran ayahs and Had
 
 ## Features
 
-- **Quran lookup** -- Arabic (Uthmani script) + English (Sahih International) side by side
-- **Hadith lookup** -- 7 collections with Arabic + English text
+- **Quran lookup** -- Arabic (Uthmani script) + configurable translation (15+ languages)
+- **Hadith lookup** -- 10 collections across two sources with Arabic + translation text
+- **Dual hadith sources** -- fawazahmed0 (free, no key) or hadithapi.com (free API key, grading info)
+- **Translation settings** -- toggle translations on/off, pick from curated Quran translations, choose hadith language
 - **Sidebar preview** -- preview text before inserting into the document
-- **Ayah navigation** -- browse previous/next ayahs in the sidebar
+- **Ayah navigation** -- browse previous/next ayahs with surah boundary wrapping
+- **Hadith navigation** -- browse previous/next hadiths in the sidebar
+- **Ayah ranges** -- look up and insert multiple consecutive ayahs (e.g., 2:255-257)
 - **Inline tag scanner** -- type `/quran 2:255` or `/hadith bukhari:1` in your document and batch-replace all tags with formatted blocks
+- **Hadith grading** -- shows Sahih/Hasan/Da'eef status when using hadithapi.com
 
 ## Installation
 
@@ -33,12 +38,24 @@ Google Apps Script add-on that lets users look up and insert Quran ayahs and Had
 
 ## Usage
 
+### Settings
+
+On first use, expand the **Settings** panel at the top of the sidebar to configure:
+
+- **Translation toggle** -- show or hide translations alongside Arabic text
+- **Quran translation** -- choose from 15+ translations across multiple languages (default: Sahih International)
+- **Hadith source** -- fawazahmed0 (free, no setup) or hadithapi.com (free API key required, provides hadith grading)
+- **Hadith translation** -- English or Urdu (Urdu only available with hadithapi.com)
+- **API key** -- if using hadithapi.com, paste your key and click **Test** to verify
+
+Settings are saved per-user and persist across sessions.
+
 ### Sidebar (interactive)
 
 1. Open the sidebar: **Quran & Hadith** menu > **Open Sidebar**
-2. **Quran**: Enter surah number (1-114) and ayah number, click **Look Up**, preview the Arabic + English text, then click **Insert into Doc**
+2. **Quran**: Enter surah number (1-114) and ayah number, click **Look Up**, preview the Arabic + translation text, then click **Insert into Doc**
 3. **Hadith**: Select a collection from the dropdown, enter the hadith number, click **Look Up**, preview, then **Insert into Doc**
-4. Use the Previous / Next buttons to browse ayahs before inserting
+4. Use the Previous / Next buttons to browse ayahs or hadiths before inserting
 
 ### Inline tags (batch mode)
 
@@ -49,7 +66,11 @@ Type tags anywhere in your document, then use **Scan & Replace All Tags** from t
 
 ## Supported Hadith Collections
 
-bukhari, muslim, abudawud, tirmidhi, nasai, ibnmajah, malik
+**Both sources:** bukhari, muslim, abudawud, tirmidhi, nasai, ibnmajah
+
+**fawazahmed0 only:** malik
+
+**hadithapi.com only:** mishkat, musnadahmad, silsilasahiha
 
 ## Developer Setup
 
@@ -66,8 +87,9 @@ Update `.clasp.json` with your Apps Script project ID after creation.
 
 ## APIs Used
 
-- **Quran**: [Al Quran Cloud API](https://alquran.cloud/api) -- Uthmani script + Sahih International
-- **Hadith**: [fawazahmed0 Hadith API](https://github.com/fawazahmed0/hadith-api) via jsDelivr CDN
+- **Quran**: [Al Quran Cloud API](https://alquran.cloud/api) -- Uthmani script + configurable translations
+- **Hadith (default)**: [fawazahmed0 Hadith API](https://github.com/fawazahmed0/hadith-api) via jsDelivr CDN -- free, no key required
+- **Hadith (optional)**: [hadithapi.com](https://hadithapi.com) -- free API key, includes hadith grading (Sahih/Hasan/Da'eef), Urdu translations, extra collections
 
 ## License
 

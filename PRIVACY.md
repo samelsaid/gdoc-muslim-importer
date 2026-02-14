@@ -8,15 +8,26 @@ Quran & Hadith for Google Docs ("the Add-on") is a Google Docs add-on that lets 
 
 ## Data We Collect
 
-**None.** The Add-on does not collect, store, transmit, or share any personal data or user information.
+**No personal data.** The Add-on does not collect, transmit, or share any personal information with us or any third party.
+
+## Data We Store Locally
+
+The Add-on stores your preferences using Google Apps Script's `PropertiesService` (per-user, within Google's infrastructure). This includes:
+
+- **Translation preferences** (e.g., which Quran translation edition, hadith translation language)
+- **Hadith source selection** (fawazahmed0 or hadithapi.com)
+- **hadithapi.com API key** (if you choose to use that source)
+
+This data is stored in your Google account's script properties, not on our servers. Only you and the Add-on can access it.
 
 ## How the Add-on Works
 
 - The Add-on runs entirely within your Google Docs environment.
 - When you look up a Quran ayah or Hadith, the Add-on makes API requests to third-party services to retrieve the text:
   - **Al Quran Cloud API** (`api.alquran.cloud`) — for Quran text
-  - **fawazahmed0 Hadith API** via jsDelivr (`cdn.jsdelivr.net`) — for Hadith text
-- These requests contain only the surah/ayah number or hadith collection/number you entered. No personal information is included in these requests.
+  - **fawazahmed0 Hadith API** via jsDelivr (`cdn.jsdelivr.net`) — for Hadith text (default source, no API key required)
+  - **hadithapi.com** (`hadithapi.com`) — optional alternative Hadith source (requires a free API key you obtain directly from hadithapi.com)
+- These requests contain only the surah/ayah number or hadith collection/number you entered. If you use hadithapi.com, your API key is included in requests to that service. No other personal information is included.
 - Retrieved text is inserted directly into your Google Doc. No data is sent to or stored on our servers.
 
 ## Google User Data
@@ -33,7 +44,7 @@ The Add-on accesses your document **only** to insert text you explicitly request
 
 ## Data Storage
 
-The Add-on has no backend, no database, and no server-side storage. It does not use cookies, local storage, analytics, or tracking of any kind.
+The Add-on has no backend, no database, and no server-side storage of its own. User preferences are stored in Google Apps Script's `PropertiesService` within your Google account. It does not use cookies, analytics, or tracking of any kind.
 
 ## Third-Party Services
 
@@ -41,6 +52,7 @@ The Add-on communicates with the following third-party APIs solely to retrieve r
 
 - [Al Quran Cloud](https://alquran.cloud) — [Privacy Policy](https://alquran.cloud/privacy-policy)
 - [jsDelivr CDN](https://www.jsdelivr.com) — [Privacy Policy](https://www.jsdelivr.com/privacy-policy-jsdelivr-net)
+- [hadithapi.com](https://hadithapi.com) (optional, user-enabled) — contact hadithapi.com for their privacy policy
 
 We do not control these services and recommend reviewing their privacy policies.
 

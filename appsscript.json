@@ -5,7 +5,8 @@
   "runtimeVersion": "V8",
   "urlFetchWhitelist": [
     "https://api.alquran.cloud/",
-    "https://cdn.jsdelivr.net/"
+    "https://cdn.jsdelivr.net/",
+    "https://hadithapi.com/"
   ],
   "oauthScopes": [
     "https://www.googleapis.com/auth/documents.currentonly",
@@ -15,7 +16,7 @@
   "addOns": {
     "common": {
       "name": "Quran & Hadith",
-      "logoUrl": "https://TODO_LOGO_URL",
+      "logoUrl": "https://raw.githubusercontent.com/samelsaid/gdoc-muslim-importer/main/muslim_importer_icon_128.png",
       "homepageTrigger": {
         "runFunction": "onOpen"
       }

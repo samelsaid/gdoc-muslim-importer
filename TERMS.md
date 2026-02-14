@@ -8,7 +8,7 @@ By installing or using the Quran & Hadith for Google Docs add-on ("the Add-on"),
 
 ## 2. Description of Service
 
-The Add-on allows users to look up and insert Quran ayahs and Hadith references directly into Google Docs, with formatted Arabic and English text. The Add-on is provided free of charge for personal and non-commercial use.
+The Add-on allows users to look up and insert Quran ayahs and Hadith references directly into Google Docs, with formatted Arabic text and configurable translations. The Add-on supports multiple hadith sources and translation languages. The Add-on is provided free of charge for personal and non-commercial use.
 
 ## 3. License
 
@@ -16,11 +16,11 @@ The Add-on is licensed under the GNU Affero General Public License v3.0 (AGPL-3.
 
 ## 4. Third-Party APIs
 
-The Add-on retrieves text from third-party APIs (Al Quran Cloud and fawazahmed0 Hadith API). We do not control these services and are not responsible for their availability, accuracy, or content. These services may have their own terms of use.
+The Add-on retrieves text from third-party APIs (Al Quran Cloud, fawazahmed0 Hadith API, and optionally hadithapi.com). We do not control these services and are not responsible for their availability, accuracy, or content. These services may have their own terms of use. If you choose to use hadithapi.com, you are responsible for complying with their terms and managing your API key.
 
 ## 5. Accuracy of Content
 
-Religious text is retrieved from third-party sources. While we use reputable sources (Uthmani script, Sahih International translation, established Hadith collections), we do not guarantee the accuracy or completeness of any content. Users should verify important references with authoritative Islamic scholarship.
+Religious text is retrieved from third-party sources. While we use reputable sources (Uthmani script, multiple translation editions, established Hadith collections), we do not guarantee the accuracy or completeness of any content. Hadith grading information (Sahih, Hasan, Da'eef) provided by hadithapi.com is sourced from that service and should be verified with authoritative Islamic scholarship.
 
 ## 6. No Warranty
 
