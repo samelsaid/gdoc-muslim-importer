@@ -3,6 +3,10 @@
   "dependencies": {},
   "exceptionLogging": "STACKDRIVER",
   "runtimeVersion": "V8",
+  "urlFetchWhitelist": [
+    "https://api.alquran.cloud/",
+    "https://cdn.jsdelivr.net/"
+  ],
   "oauthScopes": [
     "https://www.googleapis.com/auth/documents.currentonly",
     "https://www.googleapis.com/auth/script.external_request",

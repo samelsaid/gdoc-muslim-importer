@@ -12,11 +12,14 @@ Google Apps Script add-on that lets users look up and insert Quran ayahs and Had
 
 ## Installation
 
-### From Google Workspace Marketplace (coming soon)
+### From Google Workspace Marketplace (recommended)
 
-Once published, install with one click from the Marketplace. The add-on will be available in all your Google Docs automatically.
+1. Open the [Quran & Hadith add-on](https://workspace.google.com/marketplace) in the Google Workspace Marketplace
+2. Click **Install**
+3. Grant the requested permissions
+4. Open any Google Doc -- the **Quran & Hadith** menu will appear automatically
 
-### Manual setup (for personal use)
+### Manual setup
 
 1. Open any Google Doc
 2. Go to **Extensions > Apps Script**
@@ -58,17 +61,6 @@ clasp push
 ```
 
 Update `.clasp.json` with your Apps Script project ID after creation.
-
-## Publishing to Google Workspace Marketplace
-
-1. Create a standard Google Cloud project at [console.cloud.google.com](https://console.cloud.google.com)
-2. In the Apps Script editor: **Project Settings > Change project** > enter your Cloud project number
-3. In Cloud Console: **APIs & Services > OAuth consent screen** > configure app name, scopes, and contact email
-4. Enable **Google Workspace Marketplace SDK** in Cloud Console
-5. Configure the SDK: add-on name, description, icons, version number, OAuth scopes
-6. Update the `logoUrl` in `appsscript.json` with your actual hosted logo URL
-7. Create a privacy policy page (required by Google)
-8. Submit for review
 
 ## APIs Used
 
