@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Google Sans', Arial, sans-serif; padding: 12px; background: #fafafa; color: #333; font-size: 13px; }
+
+    h2 { font-size: 15px; margin-bottom: 8px; color: #1a5276; }
+    h3 { font-size: 13px; margin: 12px 0 6px; color: #555; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
+
+    .section { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+
+    label { display: block; font-size: 11px; color: #666; margin-bottom: 3px; font-weight: 500; }
+    input, select { width: 100%; padding: 7px 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 13px; margin-bottom: 8px; }
+    input:focus, select:focus { outline: none; border-color: #1a5276; box-shadow: 0 0 0 2px rgba(26,82,118,0.15); }
+
+    .row { display: flex; gap: 8px; }
+    .row > div { flex: 1; }
+
+    button { padding: 8px 14px; border: none; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: 500; transition: background 0.2s; }
+    .btn-primary { background: #1a5276; color: white; width: 100%; }
+    .btn-primary:hover { background: #154360; }
+    .btn-secondary { background: #e8e8e8; color: #333; }
+    .btn-secondary:hover { background: #d5d5d5; }
+    .btn-small { padding: 5px 10px; font-size: 11px; }
+
+    .nav-row { display: flex; gap: 6px; margin-top: 8px; justify-content: center; }
+
+    .preview { background: #f9f9f0; border: 1px solid #e0dcc8; border-radius: 6px; padding: 10px; margin: 8px 0; display: none; }
+    .preview .arabic { text-align: right; font-size: 18px; color: #1a5276; direction: rtl; line-height: 1.8; margin-bottom: 6px; font-family: 'Traditional Arabic', 'Amiri', serif; }
+    .preview .english { font-size: 12px; color: #555; font-style: italic; line-height: 1.5; }
+    .preview .ref { text-align: center; font-size: 11px; color: #888; margin-bottom: 6px; font-weight: bold; }
+
+    .status { font-size: 11px; padding: 6px 10px; border-radius: 4px; margin-top: 6px; display: none; }
+    .status.success { display: block; background: #d4edda; color: #155724; }
+    .status.error { display: block; background: #f8d7da; color: #721c24; }
+
+    .help { font-size: 10px; color: #999; margin-top: 4px; }
+    .collections { font-size: 10px; color: #888; line-height: 1.6; margin-top: 4px; }
+
+    .validation-error { font-size: 10px; color: #d32f2f; margin-top: -5px; margin-bottom: 5px; display: none; }
+    input.invalid, select.invalid { border-color: #d32f2f; box-shadow: 0 0 0 2px rgba(211,47,47,0.15); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+
+  <!-- ── QURAN SECTION ── -->
+  <div class="section">
+    <h2>📖 Quran</h2>
+    <div class="row">
+      <div>
+        <label>Surah (1-114)</label>
+        <input type="number" id="surah" min="1" max="114" value="2" oninput="validateQuranInputs()" />
+        <div class="validation-error" id="surahError"></div>
+      </div>
+      <div>
+        <label>Ayah</label>
+        <input type="number" id="ayah" min="1" value="255" oninput="validateQuranInputs()" />
+        <div class="validation-error" id="ayahError"></div>
+      </div>
+    </div>
+
+    <button class="btn-primary" id="btnLookupAyah" onclick="lookupAyah()">Look Up Ayah</button>
+
+    <div id="quranPreview" class="preview">
+      <div class="ref" id="quranRef"></div>
+      <div class="arabic" id="quranArabic"></div>
+      <div class="english" id="quranEnglish"></div>
+
+      <div class="nav-row">
+        <button class="btn-secondary btn-small" onclick="prevAyah()">◀ Previous</button>
+        <button class="btn-primary btn-small" onclick="insertAyah()">Insert into Doc</button>
+        <button class="btn-secondary btn-small" onclick="nextAyah()">Next ▶</button>
+      </div>
+    </div>
+
+    <div id="quranStatus" class="status"></div>
+  </div>
+
+  <!-- ── HADITH SECTION ── -->
+  <div class="section">
+    <h2>📜 Hadith</h2>
+    <label>Collection</label>
+    <select id="hadithCollection" onchange="validateHadithInputs()">
+      <option value="bukhari">Sahih al-Bukhari</option>
+      <option value="muslim">Sahih Muslim</option>
+      <option value="abudawud">Abu Dawud</option>
+      <option value="tirmidhi">Tirmidhi</option>
+      <option value="nasai">Nasai</option>
+      <option value="ibnmajah">Ibn Majah</option>
+      <option value="malik">Muwatta Malik</option>
+    </select>
+
+    <label>Hadith #</label>
+    <input type="text" id="hadithNum" value="1" oninput="validateHadithInputs()" />
+    <div class="validation-error" id="hadithNumError"></div>
+
+    <button class="btn-primary" id="btnLookupHadith" onclick="lookupHadith()">Look Up Hadith</button>
+
+    <div id="hadithPreview" class="preview">
+      <div class="ref" id="hadithRef"></div>
+      <div class="arabic" id="hadithArabic"></div>
+      <div class="english" id="hadithEnglish"></div>
+
+      <div class="nav-row">
+        <button class="btn-primary btn-small" onclick="insertHadith()">Insert into Doc</button>
+      </div>
+    </div>
+
+    <div id="hadithStatus" class="status"></div>
+    <div class="collections">
+      <strong>Shorthand:</strong> bukhari, muslim, abudawud, tirmidhi, nasai, ibnmajah, malik
+    </div>
+  </div>
+
+  <!-- ── INLINE TAG SCANNER ── -->
+  <div class="section">
+    <h3>Inline Tag Scanner</h3>
+    <p class="help">Type <code>/quran 2:255</code> or <code>/hadith bukhari:1</code> anywhere in your doc, then click below to auto-replace all tags with formatted text.</p>
+    <button class="btn-primary" onclick="scanDoc()" style="margin-top:8px;">Scan & Replace All Tags</button>
+  </div>
+
+<script>
+  var currentAyahData = null;
+
+  // ── Validation ──
+
+  function showFieldError(inputId, errorId, message) {
+    var input = document.getElementById(inputId);
+    var error = document.getElementById(errorId);
+    if (message) {
+      input.className = input.className.replace(' invalid', '') + ' invalid';
+      error.textContent = message;
+      error.style.display = 'block';
+    } else {
+      input.className = input.className.replace(' invalid', '');
+      error.textContent = '';
+      error.style.display = 'none';
+    }
+  }
+
+  function validateQuranInputs() {
+    var valid = true;
+    var surah = parseInt(document.getElementById('surah').value, 10);
+    var ayah = parseInt(document.getElementById('ayah').value, 10);
+
+    if (isNaN(surah) || surah < 1 || surah > 114) {
+      showFieldError('surah', 'surahError', 'Surah must be 1-114');
+      valid = false;
+    } else {
+      showFieldError('surah', 'surahError', '');
+    }
+
+    if (isNaN(ayah) || ayah < 1) {
+      showFieldError('ayah', 'ayahError', 'Ayah must be a positive number');
+      valid = false;
+    } else {
+      showFieldError('ayah', 'ayahError', '');
+    }
+
+    var btn = document.getElementById('btnLookupAyah');
+    btn.disabled = !valid;
+    return valid;
+  }
+
+  function validateHadithInputs() {
+    var valid = true;
+    var num = parseInt(document.getElementById('hadithNum').value, 10);
+
+    if (isNaN(num) || num < 1) {
+      showFieldError('hadithNum', 'hadithNumError', 'Hadith must be a positive number');
+      valid = false;
+    } else {
+      showFieldError('hadithNum', 'hadithNumError', '');
+    }
+
+    var btn = document.getElementById('btnLookupHadith');
+    btn.disabled = !valid;
+    return valid;
+  }
+
+  // ── Quran ──
+
+  function lookupAyah() {
+    if (!validateQuranInputs()) return;
+    var surah = document.getElementById('surah').value;
+    var ayah = document.getElementById('ayah').value;
+    setStatus('quranStatus', 'Loading...', '');
+
+    google.script.run
+      .withSuccessHandler(function(data) {
+        currentAyahData = data;
+        document.getElementById('quranRef').textContent = '﴾ ' + data.surahEnglish + ' ' + data.surahNum + ':' + data.ayahNum + ' ﴿';
+        document.getElementById('quranArabic').textContent = data.arabic;
+        document.getElementById('quranEnglish').textContent = data.english;
+        document.getElementById('quranPreview').style.display = 'block';
+
+        // Sync inputs
+        document.getElementById('surah').value = data.surahNum;
+        document.getElementById('ayah').value = data.ayahNum;
+        clearStatus('quranStatus');
+      })
+      .withFailureHandler(function(err) {
+        setStatus('quranStatus', err.message, 'error');
+        document.getElementById('quranPreview').style.display = 'none';
+      })
+      .fetchAyah(parseInt(surah), parseInt(ayah));
+  }
+
+  function prevAyah() {
+    if (!currentAyahData) return;
+    var s = currentAyahData.surahNum;
+    var a = currentAyahData.ayahNum - 1;
+    if (a < 1) {
+      // Go to previous surah's last ayah — just decrement surah, set ayah high
+      s = Math.max(1, s - 1);
+      a = 999; // API will clamp or error; user can adjust
+    }
+    document.getElementById('surah').value = s;
+    document.getElementById('ayah').value = a;
+    lookupAyah();
+  }
+
+  function nextAyah() {
+    if (!currentAyahData) return;
+    var s = currentAyahData.surahNum;
+    var a = currentAyahData.ayahNum + 1;
+    if (a > currentAyahData.totalAyahs) {
+      s = Math.min(114, s + 1);
+      a = 1;
+    }
+    document.getElementById('surah').value = s;
+    document.getElementById('ayah').value = a;
+    lookupAyah();
+  }
+
+  function insertAyah() {
+    if (!currentAyahData) return;
+    setStatus('quranStatus', 'Inserting...', '');
+    google.script.run
+      .withSuccessHandler(function() {
+        setStatus('quranStatus', 'Inserted successfully!', 'success');
+      })
+      .withFailureHandler(function(err) {
+        setStatus('quranStatus', err.message, 'error');
+      })
+      .insertAyahAtCursor(currentAyahData.surahNum, currentAyahData.ayahNum);
+  }
+
+  // ── Hadith ──
+
+  function lookupHadith() {
+    if (!validateHadithInputs()) return;
+    var col = document.getElementById('hadithCollection').value;
+    var num = document.getElementById('hadithNum').value;
+    setStatus('hadithStatus', 'Loading...', '');
+
+    google.script.run
+      .withSuccessHandler(function(data) {
+        document.getElementById('hadithRef').textContent =
+          '📖 ' + capitalize(data.collection) + ' — Hadith ' + data.hadithNum + ' (Book ' + data.reference.book + ', #' + data.reference.hadith + ')';
+        document.getElementById('hadithArabic').textContent = data.arabic || '';
+        document.getElementById('hadithEnglish').textContent = data.english;
+        document.getElementById('hadithPreview').style.display = 'block';
+        clearStatus('hadithStatus');
+      })
+      .withFailureHandler(function(err) {
+        setStatus('hadithStatus', err.message, 'error');
+        document.getElementById('hadithPreview').style.display = 'none';
+      })
+      .fetchHadith(col, num);
+  }
+
+  function insertHadith() {
+    if (!validateHadithInputs()) return;
+    var col = document.getElementById('hadithCollection').value;
+    var num = document.getElementById('hadithNum').value;
+    setStatus('hadithStatus', 'Inserting...', '');
+
+    google.script.run
+      .withSuccessHandler(function() {
+        setStatus('hadithStatus', 'Inserted successfully!', 'success');
+      })
+      .withFailureHandler(function(err) {
+        setStatus('hadithStatus', err.message, 'error');
+      })
+      .insertHadithAtCursor(col, num);
+  }
+
+  // ── Scanner ──
+
+  function scanDoc() {
+    google.script.run
+      .withSuccessHandler(function() {})
+      .withFailureHandler(function(err) { alert(err.message); })
+      .scanAndReplace();
+  }
+
+  // ── Helpers ──
+
+  function setStatus(id, msg, type) {
+    var el = document.getElementById(id);
+    el.textContent = msg;
+    el.className = 'status' + (type ? ' ' + type : '');
+    el.style.display = 'block';
+  }
+  function clearStatus(id) {
+    document.getElementById(id).style.display = 'none';
+  }
+  function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+</script>
+
+</body>
+</html>

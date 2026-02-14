@@ -1,0 +1,21 @@
+{
+  "timeZone": "America/New_York",
+  "dependencies": {},
+  "exceptionLogging": "STACKDRIVER",
+  "runtimeVersion": "V8",
+  "oauthScopes": [
+    "https://www.googleapis.com/auth/documents.currentonly",
+    "https://www.googleapis.com/auth/script.external_request",
+    "https://www.googleapis.com/auth/script.container.ui"
+  ],
+  "addOns": {
+    "common": {
+      "name": "Quran & Hadith",
+      "logoUrl": "https://TODO_LOGO_URL",
+      "homepageTrigger": {
+        "runFunction": "onOpen"
+      }
+    },
+    "docs": {}
+  }
+}
