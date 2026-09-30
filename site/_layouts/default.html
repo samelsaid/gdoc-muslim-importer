@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% if page.title %}{{ page.title }} · {% endif %}{{ site.title }}</title>
+<meta name="description" content="{{ page.description | default: site.description }}">
+<link rel="icon" type="image/png" href="{{ '/assets/muslim_importer_icon_32.png' | relative_url }}">
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #ffffff;
+    --fg: #1b1b1f;
+    --muted: #55575e;
+    --accent: #0f6b4c;
+    --accent-fg: #ffffff;
+    --border: #dfe1e6;
+    --card-bg: #f6f7f9;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14151a;
+      --fg: #eceef2;
+      --muted: #b3b6c0;
+      --accent: #3fcf94;
+      --accent-fg: #0b1410;
+      --border: #2b2d35;
+      --card-bg: #1c1e25;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  header.site-header {
+    border-bottom: 1px solid var(--border);
+    padding: 32px 0 24px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .brand img {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    flex-shrink: 0;
+  }
+  .brand h1 {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+  .brand-name {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+  .brand-name a {
+    color: var(--fg);
+    text-decoration: none;
+  }
+  .tagline {
+    margin: 6px 0 0;
+    color: var(--muted);
+    max-width: 60ch;
+  }
+  main {
+    padding: 32px 0 8px;
+  }
+  main :first-child { margin-top: 0; }
+  h2 { margin-top: 2em; }
+  a { color: var(--accent); }
+  .btn {
+    display: inline-block;
+    background: var(--accent);
+    color: var(--accent-fg);
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    margin: 12px 0 4px;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 1em 0;
+    display: block;
+    overflow-x: auto;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 8px 10px;
+    text-align: left;
+  }
+  th {
+    background: var(--card-bg);
+  }
+  td code, th code {
+    overflow-wrap: anywhere;
+  }
+  code {
+    background: var(--card-bg);
+    padding: 0.1em 0.35em;
+    border-radius: 4px;
+    font-size: 0.92em;
+  }
+  pre {
+    background: var(--card-bg);
+    padding: 12px 14px;
+    border-radius: 8px;
+    overflow-x: auto;
+  }
+  pre code { background: none; padding: 0; }
+  .screens {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    margin: 1em 0;
+  }
+  .screens img {
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+  footer.site-footer {
+    border-top: 1px solid var(--border);
+    margin-top: 48px;
+    padding: 20px 0 40px;
+    color: var(--muted);
+    font-size: 0.92rem;
+  }
+  footer.site-footer nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    margin-bottom: 8px;
+  }
+  footer.site-footer nav a { color: var(--fg); text-decoration: none; }
+  footer.site-footer nav a:hover { text-decoration: underline; }
+  .sep { color: var(--border); }
+  @media (max-width: 400px) {
+    .brand h1, .brand-name { font-size: 1.25rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="brand">
+      <img src="{{ '/assets/muslim_importer_icon_128.png' | relative_url }}" alt="{{ site.title }} icon">
+      <div>
+        {% if page.title %}
+        <p class="brand-name"><a href="{{ '/' | relative_url }}">{{ site.title }}</a></p>
+        {% else %}
+        <h1>{{ site.title }}</h1>
+        {% endif %}
+      </div>
+    </div>
+    <p class="tagline">{{ site.description }}</p>
+  </header>
+  <main>
+    {% if page.title %}<h1>{{ page.title }}</h1>{% endif %}
+    {{ content }}
+  </main>
+  <footer class="site-footer">
+    <nav>
+      <a href="{{ '/privacy/' | relative_url }}">Privacy policy</a>
+      <span class="sep" aria-hidden="true">·</span>
+      <a href="{{ '/terms/' | relative_url }}">Terms of service</a>
+      <span class="sep" aria-hidden="true">·</span>
+      <a href="{{ '/support/' | relative_url }}">Support</a>
+      <span class="sep" aria-hidden="true">·</span>
+      <a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a>
+    </nav>
+    <p>&copy; 2026 {{ site.developer }}</p>
+  </footer>
+</div>
+</body>
+</html>

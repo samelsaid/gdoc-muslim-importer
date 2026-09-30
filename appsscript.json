@@ -6,21 +6,14 @@
   "urlFetchWhitelist": [
     "https://api.alquran.cloud/",
     "https://cdn.jsdelivr.net/",
-    "https://hadithapi.com/"
+    "https://hadithapi.com/",
+    "https://api.sunnah.com/",
+    "https://tafsir.app/",
+    "https://api.quran.com/"
   ],
   "oauthScopes": [
     "https://www.googleapis.com/auth/documents.currentonly",
     "https://www.googleapis.com/auth/script.external_request",
     "https://www.googleapis.com/auth/script.container.ui"
-  ],
-  "addOns": {
-    "common": {
-      "name": "Quran & Hadith",
-      "logoUrl": "https://raw.githubusercontent.com/samelsaid/gdoc-muslim-importer/main/muslim_importer_icon_128.png",
-      "homepageTrigger": {
-        "runFunction": "onOpen"
-      }
-    },
-    "docs": {}
-  }
+  ]
 }

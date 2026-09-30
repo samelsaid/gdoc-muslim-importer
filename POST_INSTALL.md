@@ -1,11 +1,11 @@
-# Quran & Hadith — Installed Successfully
+# Quran & Hadith Importer — Installed Successfully
 
-Jazakallahu khairan for installing Quran & Hadith for Google Docs!
+Jazakallahu khairan for installing Quran & Hadith Importer for Google Docs!
 
 ## Quick Start
 
 1. Open any **Google Doc**
-2. Click **Quran & Hadith** in the menu bar
+2. Click **Extensions** in the menu bar, then **Quran & Hadith Importer**
 3. Select **Open Sidebar**
 
 ## Configure Settings (optional)
@@ -14,10 +14,11 @@ Expand the **Settings** panel at the top of the sidebar to:
 
 - Toggle translation display on/off
 - Choose your preferred Quran translation (15+ languages available)
-- Switch between hadith sources (fawazahmed0 or hadithapi.com)
+- Switch between hadith sources (sunnah.com, fawazahmed0, or hadithapi.com) and pick a fallback source for when your default fails
+- Switch between tafsir sources (tafsir.app or quran.com) and pick its fallback the same way
 - Select hadith translation language (English or Urdu)
 
-Settings are saved and persist across sessions.
+Settings are saved and persist across sessions. Fallbacks are on by default; turn either off with its **Use the fallback when the default fails** checkbox.
 
 ## Look Up & Insert
 
@@ -37,13 +38,15 @@ Type tags directly in your document and replace them all at once:
 /hadith bukhari:1
 ```
 
-Then click **Scan & Replace All Tags** from the sidebar or menu to convert them into formatted blocks.
+Then click **Replace All Tags** from the sidebar, or **Extensions > Quran & Hadith Importer > Scan & Replace Tags** from the menu, to convert them into formatted blocks. The sidebar's **Tag cheat sheet** (inside Inline Tag Scanner) lists more tag examples, including source prefixes like `fawaz:` and `hadithapi:`.
 
 ## Supported Collections
 
-**Default (fawazahmed0):** Bukhari, Muslim, Abu Dawud, Tirmidhi, Nasai, Ibn Majah, Malik
+**Default (sunnah.com):** 18 collections, including Bukhari, Muslim, Abu Dawud, Tirmidhi, Nasai, Ibn Majah, Mishkat al-Masabih, and Musnad Ahmad (partial), with hadith grading
 
-**With hadithapi.com:** adds Mishkat al-Masabih, Musnad Ahmad, Al-Silsila al-Sahiha (plus hadith grading)
+**fawazahmed0 (free, no key):** Bukhari, Muslim, Abu Dawud, Tirmidhi, Nasai, Ibn Majah, Malik
+
+**With hadithapi.com (your own free key):** adds Al-Silsila al-Sahiha (plus Urdu translations); Mishkat al-Masabih and Musnad Ahmad aren't available there yet, so those tags use sunnah.com automatically
 
 ## Need Help?
 

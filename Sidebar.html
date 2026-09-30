@@ -64,10 +64,24 @@
     .settings-status.success { color: #155724; }
     .settings-status.error { color: #721c24; }
     .status-badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 3px; color: #fff; margin-left: 6px; vertical-align: middle; }
-    .status-badge.sahih { background: #2e7d32; }
-    .status-badge.hasan { background: #e65100; }
-    .status-badge.daif { background: #c62828; }
+    .status-badge.neutral { background: #e0e0e0; color: #333; }
+    .grade-row { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; }
+    .grade-row input[type="color"] { width: 32px; height: 28px; padding: 0; margin: 0; flex-shrink: 0; }
+    .grade-row .grade-name { width: 44px; font-size: 11px; flex-shrink: 0; }
+    .grade-row input[type="text"] { flex: 1; margin: 0; }
+    .tag-run { display: none; margin-top: 8px; }
+    .tag-run.visible { display: block; }
+    .progress { height: 6px; background: #e0e0e0; border-radius: 3px; overflow: hidden; margin-bottom: 4px; }
+    .progress-bar { height: 100%; width: 0; background: #1a5276; }
+    .tag-summary { font-size: 11px; margin-top: 6px; white-space: pre-line; }
     select:disabled, input:disabled { background: #f0f0f0; color: #999; }
+    .tafsir-row { margin-top: 10px; border-top: 1px dashed #e0dcc8; padding-top: 8px; }
+    .tafsir-row .row select { margin-bottom: 0; }
+    .tafsir-box { max-height: 240px; overflow-y: auto; background: #fff; border: 1px solid #eee; border-radius: 4px; padding: 8px; margin-top: 6px; white-space: pre-line; font-size: 13px; line-height: 1.7; }
+    .cheat-example-row { margin-bottom: 6px; }
+    .cheat-example { display: block; font-family: 'Courier New', monospace; font-size: 11px; background: #f0f0f0; padding: 3px 5px; border-radius: 3px; white-space: pre; overflow-x: auto; }
+    .cheat-desc { font-size: 10px; color: #888; margin: 2px 0 0 4px; }
+    .settings-group-title .noupper { text-transform: none; letter-spacing: normal; }
   </style>
 </head>
 <body>
@@ -84,11 +98,11 @@
       <div class="settings-group">
         <div class="settings-group-title">Translation</div>
         <div class="checkbox-row">
-          <input type="checkbox" id="showTranslation" checked onchange="onTranslationToggle()" />
+          <input type="checkbox" id="showTranslation" checked onchange="onTranslationToggle(); markSettingsUnsaved();" />
           <label for="showTranslation">Show translation alongside Arabic</label>
         </div>
         <label>Quran Translation</label>
-        <select id="quranTranslation">
+        <select id="quranTranslation" onchange="markSettingsUnsaved()">
           <option value="en.sahih">English — Sahih International</option>
           <option value="en.pickthall">English — Pickthall</option>
           <option value="en.yusufali">English — Yusuf Ali</option>
@@ -106,26 +120,83 @@
           <option value="bn.bengali">Bengali</option>
         </select>
         <label>Hadith Translation</label>
-        <select id="hadithTranslation">
+        <select id="hadithTranslation" onchange="markSettingsUnsaved()">
           <option value="english">English</option>
         </select>
       </div>
 
       <div class="settings-group">
-        <div class="settings-group-title">Hadith Source</div>
-        <label>Source</label>
-        <select id="hadithSource" onchange="onSourceChange()">
+        <div class="settings-group-title">Hadith Sources</div>
+        <label>Default source</label>
+        <select id="hadithSource" onchange="onHadithSourceChange()">
+          <option value="sunnah">sunnah.com (recommended)</option>
           <option value="fawazahmed0">fawazahmed0 (free)</option>
-          <option value="hadithapi">hadithapi.com</option>
+          <option value="hadithapi">hadithapi.com (your own key)</option>
         </select>
-        <div class="api-key-section" id="apiKeySection">
+        <label>Fallback source</label>
+        <select id="hadithFallback" onchange="onHadithFallbackChange()"></select>
+        <div class="checkbox-row">
+          <input type="checkbox" id="hadithFallbackOn" checked onchange="onHadithFallbackToggle()" />
+          <label for="hadithFallbackOn">Use the fallback when the default fails</label>
+        </div>
+        <div class="help">Off: skip the tag and show the error.</div>
+        <div class="help" id="hadithFallbackCoverage"></div>
+        <div class="api-key-section visible" id="apiKeySection">
           <label>API Key</label>
           <div class="api-key-row">
-            <input type="password" id="hadithApiKey" placeholder="Enter your API key" />
+            <input type="password" id="hadithApiKey" placeholder="Enter your API key" oninput="markSettingsUnsaved()" />
             <button class="btn-secondary btn-small" id="btnTestApiKey" onclick="testApiKey()">Test</button>
           </div>
-          <div class="help">Get a free key at hadithapi.com</div>
+          <div class="help">Needed for hadithapi.com citations. Get a free key at hadithapi.com</div>
           <div class="settings-status" id="apiKeyStatus"></div>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <div class="settings-group-title">Grade Colors</div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="gradeBadge" checked onchange="markSettingsUnsaved()" />
+          <label for="gradeBadge">Color the badge in the sidebar preview</label>
+        </div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="gradeDocText" onchange="markSettingsUnsaved()" />
+          <label for="gradeDocText">Color the grade text in inserted docs</label>
+        </div>
+        <div class="grade-row"><input type="color" id="gradeColorSahih" onchange="markSettingsUnsaved()" /><span class="grade-name">Sahih</span><input type="text" id="gradeKeywordsSahih" oninput="markSettingsUnsaved()" /></div>
+        <div class="grade-row"><input type="color" id="gradeColorHasan" onchange="markSettingsUnsaved()" /><span class="grade-name">Hasan</span><input type="text" id="gradeKeywordsHasan" oninput="markSettingsUnsaved()" /></div>
+        <div class="grade-row"><input type="color" id="gradeColorDaif" onchange="markSettingsUnsaved()" /><span class="grade-name">Da'if</span><input type="text" id="gradeKeywordsDaif" oninput="markSettingsUnsaved()" /></div>
+        <div class="grade-row"><input type="color" id="gradeColorOther" onchange="markSettingsUnsaved()" /><span class="grade-name">Other</span><span class="help">any grade not matched</span></div>
+        <div class="help">Comma-separated keywords. The longest match wins, so "Hasan Sahih" counts as Sahih.</div>
+        <button class="btn-secondary btn-small" onclick="resetGradeColors()">Reset to defaults</button>
+      </div>
+
+      <div class="settings-group">
+        <div class="settings-group-title">Tafsir</div>
+        <label>Default source</label>
+        <select id="tafsirSource" onchange="onTafsirSourceChange()">
+          <option value="tafsir.app">tafsir.app</option>
+          <option value="quran.com">quran.com</option>
+        </select>
+        <label>Fallback source</label>
+        <select id="tafsirFallback" onchange="markSettingsUnsaved()"></select>
+        <div class="checkbox-row">
+          <input type="checkbox" id="tafsirFallbackOn" checked onchange="onTafsirFallbackToggle()" />
+          <label for="tafsirFallbackOn">Use the fallback when the default fails</label>
+        </div>
+        <div class="help">Off: skip the tag and show the error.</div>
+        <label>Default language (used when a work has more than one)</label>
+        <select id="tafsirLanguage" onchange="markSettingsUnsaved()"></select>
+        <label>Default book (for /tafsir 2:255)</label>
+        <select id="tafsirDefaultBook" onchange="markSettingsUnsaved()"></select>
+        <div class="checkbox-row">
+          <input type="checkbox" id="tafsirLimitOn" onchange="onTafsirLimitToggle(); markSettingsUnsaved();" />
+          <label for="tafsirLimitOn">Limit inserted tafsir to</label>
+          <input type="number" id="tafsirCharLimit" min="200" max="100000" value="1500" style="width:90px;margin:0;" oninput="markSettingsUnsaved()" />
+          <span class="help">characters</span>
+        </div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="tafsirLink" onchange="markSettingsUnsaved()" />
+          <label for="tafsirLink">Link to the full entry (tafsir.app)</label>
         </div>
       </div>
 
@@ -167,6 +238,19 @@
         <button class="btn-primary btn-small" id="btnInsertAyah" onclick="insertAyah()">Insert into Doc</button>
         <button class="btn-secondary btn-small" id="btnNextAyah" onclick="nextAyah()">Next &#9654;</button>
       </div>
+
+      <div class="tafsir-row">
+        <div class="row">
+          <div><select id="tafsirBook"></select></div>
+          <button class="btn-secondary btn-small" id="btnShowTafsir" onclick="showTafsir()">Show tafsir</button>
+        </div>
+        <div class="tafsir-box" id="tafsirBox" style="display:none;">
+          <div class="ref" id="tafsirHeader"></div>
+          <div id="tafsirText"></div>
+        </div>
+        <button class="btn-primary btn-small" id="btnInsertTafsir" onclick="insertTafsir()" style="margin-top:6px;display:none;">Insert tafsir</button>
+        <div id="tafsirStatus" class="status"></div>
+      </div>
     </div>
 
     <div id="quranStatus" class="status"></div>
@@ -175,27 +259,28 @@
   <!-- ── HADITH SECTION ── -->
   <div class="section">
     <h2>Hadith</h2>
-    <label>Collection</label>
-    <select id="hadithCollection" onchange="validateHadithInputs()">
-      <option value="bukhari">Sahih al-Bukhari</option>
-      <option value="muslim">Sahih Muslim</option>
-      <option value="abudawud">Abu Dawud</option>
-      <option value="tirmidhi">Tirmidhi</option>
-      <option value="nasai">Nasai</option>
-      <option value="ibnmajah">Ibn Majah</option>
-      <option value="malik">Muwatta Malik</option>
+    <label>Source</label>
+    <select id="hadithLookupSource" onchange="onLookupSourceChange()">
+      <option value="auto">Auto (uses your Settings)</option>
+      <option value="sunnah">sunnah.com</option>
+      <option value="fawazahmed0">fawazahmed0</option>
+      <option value="hadithapi">hadithapi.com</option>
     </select>
+    <select id="hadithCollection" onchange="validateHadithInputs()"></select>
 
     <label>Hadith #</label>
     <input type="text" id="hadithNum" value="1" oninput="validateHadithInputs()" />
     <div class="validation-error" id="hadithNumError"></div>
+    <div class="help" id="hadithNumHelp"></div>
 
     <button class="btn-primary" id="btnLookupHadith" onclick="lookupHadith()">Look Up Hadith</button>
 
     <div id="hadithPreview" class="preview">
       <div class="ref" id="hadithRef"></div>
       <div class="arabic" id="hadithArabic"></div>
+      <div class="english" id="hadithTransliteration" style="display:none;"></div>
       <div class="english" id="hadithTranslationText"></div>
+      <div class="help" id="hadithNote" style="display:none;"></div>
 
       <div class="nav-row">
         <button class="btn-secondary btn-small" id="btnPrevHadith" onclick="prevHadith()">&#9664; Previous</button>
@@ -205,16 +290,51 @@
     </div>
 
     <div id="hadithStatus" class="status"></div>
-    <div class="collections" id="collectionsHelp">
-      <strong>Shorthand:</strong> bukhari, muslim, abudawud, tirmidhi, nasai, ibnmajah, malik
-    </div>
+    <div class="collections" id="collectionsHelp"></div>
   </div>
 
   <!-- ── INLINE TAG SCANNER ── -->
   <div class="section">
     <h3>Inline Tag Scanner</h3>
-    <p class="help">Type <code>/quran 2:255</code>, <code>/quran 2:255-257</code>, or <code>/hadith bukhari:1</code> anywhere in your doc, then click below to auto-replace all tags with formatted text.</p>
-    <button class="btn-primary" id="btnScanReplace" onclick="scanDoc()" style="margin-top:8px;">Scan & Replace All Tags</button>
+    <p class="help">Type <code>/quran 2:255</code>, <code>/quran 2:255-257</code>, or <code>/hadith muslim:8a</code> anywhere in your doc, then replace them all at once.</p>
+
+    <div class="settings-panel">
+      <div class="settings-toggle" onclick="toggleCheatSheet()">
+        <span>&#9776;</span>
+        <h3>Tag cheat sheet</h3>
+        <span class="arrow" id="cheatSheetArrow">&#9660;</span>
+      </div>
+      <div class="settings-body" id="cheatSheetBody">
+        <p class="help">Type tags in the doc, then click Replace All Tags.</p>
+
+        <div class="settings-group-title">Quran</div>
+        <div class="cheat-example-row"><code class="cheat-example">/quran 2:255</code><div class="cheat-desc">one ayah</div></div>
+        <div class="cheat-example-row"><code class="cheat-example">/quran 2:255-257</code><div class="cheat-desc">a range</div></div>
+
+        <div class="settings-group-title">Hadith <span class="noupper">(your default unless you add a prefix)</span></div>
+        <div class="cheat-example-row"><code class="cheat-example" data-expect-source="sunnah">/hadith bukhari:1</code><div class="cheat-desc">sunnah.com</div></div>
+        <div class="cheat-example-row"><code class="cheat-example" data-expect-source="sunnah">/hadith muslim:8a</code><div class="cheat-desc">lettered parts (sunnah.com numbering)</div></div>
+        <div class="cheat-example-row"><code class="cheat-example" data-expect-source="fawazahmed0">/hadith malik:1</code><div class="cheat-desc">only on fawazahmed0, so it goes there</div></div>
+        <div class="cheat-example-row"><code class="cheat-example" data-expect-source="fawazahmed0">/hadith fawaz:muslim:100</code><div class="cheat-desc">force fawazahmed0 (its own numbering)</div></div>
+        <div class="cheat-example-row"><code class="cheat-example" data-expect-source="hadithapi">/hadith hadithapi:muslim:100</code><div class="cheat-desc">force hadithapi.com (needs your key)</div></div>
+
+        <div class="settings-group-title">Tafsir <span class="noupper">(your default unless you add a prefix)</span></div>
+        <div class="cheat-example-row"><code class="cheat-example" data-expect-source="tafsir.app">/tafsir 2:255</code><div class="cheat-desc">your default tafsir (Sa'di)</div></div>
+        <div class="cheat-example-row"><code class="cheat-example" data-expect-source="tafsir.app">/tafsir tabari 2:255-257</code><div class="cheat-desc">pick a work, up to 10 ayahs</div></div>
+        <div class="cheat-example-row"><code class="cheat-example" data-expect-source="quran.com">/tafsir ibn-kathir.en 2:255</code><div class="cheat-desc">pick a language (.en, .ur, ...)</div></div>
+        <div class="cheat-example-row"><code class="cheat-example" data-expect-source="quran.com">/tafsir quran.com:saadi 2:255</code><div class="cheat-desc">force quran.com</div></div>
+
+        <p class="help">Numbering can differ between sources.<br>A prefix guarantees which one you get.</p>
+      </div>
+    </div>
+
+    <button class="btn-primary" id="btnScanReplace" onclick="startTagRun()" style="margin-top:8px;">Replace All Tags</button>
+    <div class="tag-run" id="tagRunPanel">
+      <div class="progress"><div class="progress-bar" id="tagProgressBar"></div></div>
+      <div class="help" id="tagProgressText"></div>
+      <button class="btn-secondary btn-small" id="btnCancelTags" onclick="cancelTagRun()">Cancel</button>
+      <div class="tag-summary" id="tagSummary"></div>
+    </div>
   </div>
 
 <script>
@@ -225,16 +345,25 @@
   var currentPrefs = {
     showTranslation: true,
     quranTranslation: 'en.sahih',
-    hadithSource: 'fawazahmed0',
+    hadithSource: '',
     hadithApiKey: '',
-    hadithTranslation: 'english'
+    hadithTranslation: 'english',
+    gradeColors: null
   };
+  // Loose client check; Sunnah.gs normalizeSunnahNumber_ is authoritative.
+  var SUNNAH_NUMBER_INPUT = /^\d{1,5}[0-9a-zA-Z ,]{0,15}$/;
+  var TAG_PACING_MS = 1100;
+  var tagRun = null;
+  var currentTafsir = null;
+  // Mirrors Code.gs's HADITH_SOURCE_LABELS: the client can't read server
+  // constants, so the D5 pair-specific help text keeps its own copy.
+  var HADITH_SOURCE_LABELS = { sunnah: 'sunnah.com', fawazahmed0: 'fawazahmed0', hadithapi: 'hadithapi.com' };
 
   // ── Settings ──
 
-  function toggleSettings() {
-    var body = document.getElementById('settingsBody');
-    var arrow = document.getElementById('settingsArrow');
+  function toggleCollapsible(bodyId, arrowId) {
+    var body = document.getElementById(bodyId);
+    var arrow = document.getElementById(arrowId);
     if (body.className.indexOf('open') !== -1) {
       body.className = 'settings-body';
       arrow.innerHTML = '&#9660;';
@@ -244,7 +373,111 @@
     }
   }
 
+  function toggleSettings() { toggleCollapsible('settingsBody', 'settingsArrow'); }
+  function toggleCheatSheet() { toggleCollapsible('cheatSheetBody', 'cheatSheetArrow'); }
+
+  function markSettingsUnsaved() {
+    setSettingsStatus('settingsStatus', 'Unsaved changes. Click Save Settings to apply them.', '');
+  }
+
+  // Rebuilds fallbackId's options from defaultId's own options, excluding
+  // defaultId's current value, keeping fallbackId's current selection when
+  // it's still offered.
+  function rebuildFallbackOptions(defaultId, fallbackId) {
+    var defaultSelect = document.getElementById(defaultId);
+    var fallbackSelect = document.getElementById(fallbackId);
+    var current = fallbackSelect.value;
+    var items = [];
+    for (var i = 0; i < defaultSelect.options.length; i++) {
+      if (defaultSelect.options[i].value !== defaultSelect.value) {
+        items.push({ value: defaultSelect.options[i].value, label: defaultSelect.options[i].textContent });
+      }
+    }
+    fillSelect(fallbackId, items);
+    if (hasOption(fallbackSelect, current)) fallbackSelect.value = current;
+  }
+
+  function updateHadithFallbackCoverage() {
+    var defaultSource = document.getElementById('hadithSource').value;
+    var fallbackSource = document.getElementById('hadithFallback').value;
+    google.script.run
+      .withSuccessHandler(function(coverage) {
+        // Replies can arrive out of order; only write if the selects still
+        // hold the pair this reply is for, so a stale reply can't overwrite
+        // a newer one.
+        if (document.getElementById('hadithSource').value !== defaultSource ||
+            document.getElementById('hadithFallback').value !== fallbackSource) return;
+        var el = document.getElementById('hadithFallbackCoverage');
+        if (coverage.shared.length) {
+          el.textContent = 'Falls back only for books both number the same way: ' + coverage.shared.join(', ') + '.';
+        } else {
+          el.textContent = 'No books fall back with this pair: ' + HADITH_SOURCE_LABELS[fallbackSource] +
+            "'s numbering hasn't been checked against " + HADITH_SOURCE_LABELS[defaultSource] + '.';
+        }
+      })
+      .getFallbackCoverage(defaultSource, fallbackSource);
+  }
+
+  function onHadithSourceChange() {
+    rebuildFallbackOptions('hadithSource', 'hadithFallback');
+    updateHadithFallbackCoverage();
+    markSettingsUnsaved();
+  }
+
+  function onHadithFallbackChange() {
+    updateHadithFallbackCoverage();
+    markSettingsUnsaved();
+  }
+
+  function onHadithFallbackToggle() {
+    document.getElementById('hadithFallback').disabled = !document.getElementById('hadithFallbackOn').checked;
+    markSettingsUnsaved();
+  }
+
+  function onTafsirSourceChange() {
+    rebuildFallbackOptions('tafsirSource', 'tafsirFallback');
+    markSettingsUnsaved();
+  }
+
+  function onTafsirFallbackToggle() {
+    document.getElementById('tafsirFallback').disabled = !document.getElementById('tafsirFallbackOn').checked;
+    markSettingsUnsaved();
+  }
+
   function loadSettings() {
+    google.script.run
+      .withSuccessHandler(function(available) {
+        if (!available) removeSourceOption('sunnah');
+        loadPrefs();
+      })
+      .withFailureHandler(function() {
+        removeSourceOption('sunnah');
+        loadPrefs();
+      })
+      .isSunnahAvailable();
+  }
+
+  function removeSourceOption(value) {
+    var ids = ['hadithSource', 'hadithLookupSource'];
+    for (var j = 0; j < ids.length; j++) {
+      var select = document.getElementById(ids[j]);
+      for (var i = select.options.length - 1; i >= 0; i--) {
+        if (select.options[i].value === value) select.remove(i);
+      }
+    }
+  }
+
+  function lookupSource() {
+    return document.getElementById('hadithLookupSource').value;
+  }
+
+  function onLookupSourceChange() {
+    applySourceUI(lookupSource());
+    updateCollectionDropdown(lookupSource());
+    validateHadithInputs();
+  }
+
+  function loadPrefs() {
     google.script.run
       .withSuccessHandler(function(prefs) {
         currentPrefs = prefs;
@@ -252,17 +485,93 @@
         document.getElementById('quranTranslation').value = prefs.quranTranslation;
         document.getElementById('hadithSource').value = prefs.hadithSource;
         document.getElementById('hadithApiKey').value = prefs.hadithApiKey || '';
-        applySourceUI(prefs.hadithSource);
-        updateHadithTranslationDropdown(prefs.hadithSource);
+        rebuildFallbackOptions('hadithSource', 'hadithFallback');
+        // A stale saved fallback (e.g. 'sunnah' after the key was removed)
+        // may no longer be one of the rebuilt options; leave the rebuild's
+        // own first-option selection in that case rather than setting a
+        // value the select doesn't have (a browser would blank it to '').
+        var hadithFallbackSel = document.getElementById('hadithFallback');
+        if (hasOption(hadithFallbackSel, prefs.hadithFallback)) hadithFallbackSel.value = prefs.hadithFallback;
+        document.getElementById('hadithFallbackOn').checked = prefs.hadithFallbackOn;
+        hadithFallbackSel.disabled = !prefs.hadithFallbackOn;
+        updateHadithFallbackCoverage();
+        applySourceUI(lookupSource());
+        updateHadithTranslationDropdown();
         document.getElementById('hadithTranslation').value = prefs.hadithTranslation;
-        updateCollectionDropdown(prefs.hadithSource);
+        updateCollectionDropdown(lookupSource());
+        applyGradeColors(prefs.gradeColors);
+        loadTafsirOptions(prefs.tafsir);
         onTranslationToggle();
+        checkAutoRun();
+        setSettingsStatus('settingsStatus', '', '');
       })
       .withFailureHandler(function() {
-        // Use defaults already set in currentPrefs
+        currentPrefs.hadithSource = 'fawazahmed0';
+        // BUG-006: keep #hadithSource in sync with currentPrefs.hadithSource
+        // before rebuilding the fallback options, which read the select's
+        // current value.
+        var hadithSourceSel = document.getElementById('hadithSource');
+        if (hasOption(hadithSourceSel, 'fawazahmed0')) hadithSourceSel.value = 'fawazahmed0';
+        rebuildFallbackOptions('hadithSource', 'hadithFallback');
+        applySourceUI(lookupSource());
+        updateCollectionDropdown(lookupSource());
         onTranslationToggle();
+        checkAutoRun();
       })
       .getPrefs();
+  }
+
+  function checkAutoRun() {
+    google.script.run
+      .withSuccessHandler(function(armed) {
+        if (armed) startTagRun();
+      })
+      .consumeAutoRun();
+  }
+
+  function applyGradeColors(g) {
+    if (!g) return;
+    document.getElementById('gradeBadge').checked = g.badge;
+    document.getElementById('gradeDocText').checked = g.docText;
+    document.getElementById('gradeColorSahih').value = g.groups.sahih.color;
+    document.getElementById('gradeColorHasan').value = g.groups.hasan.color;
+    document.getElementById('gradeColorDaif').value = g.groups.daif.color;
+    document.getElementById('gradeColorOther').value = g.groups.other.color;
+    document.getElementById('gradeKeywordsSahih').value = g.groups.sahih.keywords.join(', ');
+    document.getElementById('gradeKeywordsHasan').value = g.groups.hasan.keywords.join(', ');
+    document.getElementById('gradeKeywordsDaif').value = g.groups.daif.keywords.join(', ');
+  }
+
+  function splitKeywords(id) {
+    var parts = document.getElementById(id).value.split(',');
+    var out = [];
+    for (var i = 0; i < parts.length; i++) {
+      var keyword = parts[i].trim();
+      if (keyword) out.push(keyword);
+    }
+    return out;
+  }
+
+  function collectGradeColors() {
+    return {
+      badge: document.getElementById('gradeBadge').checked,
+      docText: document.getElementById('gradeDocText').checked,
+      groups: {
+        sahih: { color: document.getElementById('gradeColorSahih').value, keywords: splitKeywords('gradeKeywordsSahih') },
+        hasan: { color: document.getElementById('gradeColorHasan').value, keywords: splitKeywords('gradeKeywordsHasan') },
+        daif: { color: document.getElementById('gradeColorDaif').value, keywords: splitKeywords('gradeKeywordsDaif') },
+        other: { color: document.getElementById('gradeColorOther').value }
+      }
+    };
+  }
+
+  function resetGradeColors() {
+    google.script.run
+      .withSuccessHandler(function(defaults) {
+        applyGradeColors(defaults);
+        setSettingsStatus('settingsStatus', 'Defaults restored. Save Settings to keep them.', 'success');
+      })
+      .getDefaultGradeColors();
   }
 
   function saveSettings() {
@@ -275,8 +584,12 @@
       showTranslation: document.getElementById('showTranslation').checked,
       quranTranslation: document.getElementById('quranTranslation').value,
       hadithSource: document.getElementById('hadithSource').value,
+      hadithFallback: document.getElementById('hadithFallback').value,
+      hadithFallbackOn: document.getElementById('hadithFallbackOn').checked,
       hadithApiKey: document.getElementById('hadithApiKey').value,
-      hadithTranslation: document.getElementById('hadithTranslation').value
+      hadithTranslation: document.getElementById('hadithTranslation').value,
+      gradeColors: collectGradeColors(),
+      tafsir: collectTafsirPrefs()
     };
 
     google.script.run
@@ -292,6 +605,131 @@
         setSettingsStatus('settingsStatus', err.message, 'error');
       })
       .savePrefs(prefs);
+  }
+
+  function loadTafsirOptions(settings) {
+    if (!settings) return;
+    google.script.run
+      .withSuccessHandler(function(catalog) {
+        fillSelect('tafsirLanguage', catalog.languages);
+        fillSelect('tafsirDefaultBook', catalog.books);
+        fillSelect('tafsirBook', catalog.editions);
+        document.getElementById('tafsirSource').value = settings.source;
+        rebuildFallbackOptions('tafsirSource', 'tafsirFallback');
+        var tafsirFallbackSel = document.getElementById('tafsirFallback');
+        if (hasOption(tafsirFallbackSel, settings.fallback)) tafsirFallbackSel.value = settings.fallback;
+        document.getElementById('tafsirFallbackOn').checked = settings.fallbackOn;
+        tafsirFallbackSel.disabled = !settings.fallbackOn;
+        document.getElementById('tafsirLanguage').value = settings.language;
+        document.getElementById('tafsirDefaultBook').value = settings.book;
+        document.getElementById('tafsirLimitOn').checked = settings.charLimit > 0;
+        document.getElementById('tafsirCharLimit').value = settings.charLimit > 0 ? settings.charLimit : 1500;
+        document.getElementById('tafsirLink').checked = settings.link;
+        onTafsirLimitToggle();
+        var preferred = settings.book + '.' + settings.language;
+        var row = document.getElementById('tafsirBook');
+        row.value = hasOption(row, preferred) ? preferred : firstOptionFor(row, settings.book);
+      })
+      .getTafsirBooks();
+  }
+
+  function fillSelect(id, items) {
+    var select = document.getElementById(id);
+    select.innerHTML = '';
+    for (var i = 0; i < items.length; i++) {
+      var opt = document.createElement('option');
+      opt.value = items[i].value;
+      opt.textContent = items[i].label;
+      select.appendChild(opt);
+    }
+  }
+
+  function hasOption(select, value) {
+    for (var i = 0; i < select.options.length; i++) {
+      if (select.options[i].value === value) return true;
+    }
+    return false;
+  }
+
+  function firstOptionFor(select, book) {
+    for (var i = 0; i < select.options.length; i++) {
+      if (select.options[i].value.indexOf(book + '.') === 0) return select.options[i].value;
+    }
+    return select.options.length ? select.options[0].value : '';
+  }
+
+  function onTafsirLimitToggle() {
+    document.getElementById('tafsirCharLimit').disabled = !document.getElementById('tafsirLimitOn').checked;
+  }
+
+  function collectTafsirPrefs() {
+    var on = document.getElementById('tafsirLimitOn').checked;
+    return {
+      source: document.getElementById('tafsirSource').value,
+      fallback: document.getElementById('tafsirFallback').value,
+      fallbackOn: document.getElementById('tafsirFallbackOn').checked,
+      language: document.getElementById('tafsirLanguage').value,
+      book: document.getElementById('tafsirDefaultBook').value,
+      charLimit: on ? parseInt(document.getElementById('tafsirCharLimit').value, 10) || 0 : 0,
+      link: document.getElementById('tafsirLink').checked
+    };
+  }
+
+  function currentAyahRef() {
+    if (!currentAyahData) return '';
+    var range = currentAyahData._rangeData;
+    if (range && range.length > 1) {
+      return range[0].surahNum + ':' + range[0].ayahNum + '-' + range[range.length - 1].ayahNum;
+    }
+    return currentAyahData.surahNum + ':' + currentAyahData.ayahNum;
+  }
+
+  function showTafsir() {
+    var ref = currentAyahRef();
+    if (!ref) return;
+    setStatus('tafsirStatus', 'Loading...', '');
+    google.script.run
+      .withSuccessHandler(function(result) {
+        renderTafsir(result);
+      })
+      .withFailureHandler(function(err) {
+        currentTafsir = null;
+        document.getElementById('tafsirBox').style.display = 'none';
+        document.getElementById('btnInsertTafsir').style.display = 'none';
+        setStatus('tafsirStatus', err.message, 'error');
+      })
+      .fetchTafsir(ref, document.getElementById('tafsirBook').value);
+  }
+
+  function renderTafsir(result) {
+    currentTafsir = result;
+    var parts = [];
+    for (var i = 0; i < result.blocks.length; i++) {
+      parts.push((result.blocks.length > 1 ? result.blocks[i].header + '\n' : '') + result.blocks[i].text);
+    }
+    var tafsirHeaderText = result.blocks.length === 1 ? result.blocks[0].header : result.label;
+    if (result.fallbackFrom) tafsirHeaderText = tafsirHeaderText + ' · ' + result.source + ' (fallback from ' + result.fallbackFrom + ')';
+    document.getElementById('tafsirHeader').textContent = tafsirHeaderText;
+    var textEl = document.getElementById('tafsirText');
+    textEl.textContent = parts.join('\n\n');
+    textEl.style.direction = result.rtl ? 'rtl' : 'ltr';
+    textEl.style.textAlign = result.rtl ? 'right' : 'left';
+    document.getElementById('tafsirBox').style.display = 'block';
+    document.getElementById('btnInsertTafsir').style.display = 'inline-block';
+    clearStatus('tafsirStatus');
+  }
+
+  function insertTafsir() {
+    if (!currentTafsir) return;
+    setStatus('tafsirStatus', 'Inserting...', '');
+    google.script.run
+      .withSuccessHandler(function() {
+        setStatus('tafsirStatus', 'Inserted successfully!', 'success');
+      })
+      .withFailureHandler(function(err) {
+        setStatus('tafsirStatus', err.message, 'error');
+      })
+      .insertTafsirAtCursor(currentTafsir.ref, currentTafsir.spec);
   }
 
   function testApiKey() {
@@ -319,20 +757,10 @@
       .testHadithApiKey(apiKey);
   }
 
-  function onSourceChange() {
-    var source = document.getElementById('hadithSource').value;
-    applySourceUI(source);
-    updateHadithTranslationDropdown(source);
-    updateCollectionDropdown(source);
-  }
-
+  // source: the lookup Source picker's value ('auto', 'sunnah', 'fawazahmed0', or 'hadithapi').
   function applySourceUI(source) {
-    var section = document.getElementById('apiKeySection');
-    if (source === 'hadithapi') {
-      section.className = 'api-key-section visible';
-    } else {
-      section.className = 'api-key-section';
-    }
+    var digitsOnly = source === 'fawazahmed0' || source === 'hadithapi';
+    document.getElementById('hadithNumHelp').textContent = digitsOnly ? '' : 'Examples: 1, 8a';
   }
 
   function onTranslationToggle() {
@@ -376,29 +804,18 @@
       .getCollectionsForSource(source);
   }
 
-  function updateHadithTranslationDropdown(source) {
+  function updateHadithTranslationDropdown() {
     var select = document.getElementById('hadithTranslation');
-    var currentVal = select.value;
+    var currentVal = select.value || 'english';
     select.innerHTML = '';
-
-    var engOpt = document.createElement('option');
-    engOpt.value = 'english';
-    engOpt.textContent = 'English';
-    select.appendChild(engOpt);
-
-    if (source === 'hadithapi') {
-      var urduOpt = document.createElement('option');
-      urduOpt.value = 'urdu';
-      urduOpt.textContent = 'Urdu';
-      select.appendChild(urduOpt);
+    var options = [['english', 'English'], ['urdu', 'Urdu (hadithapi.com only)']];
+    for (var i = 0; i < options.length; i++) {
+      var opt = document.createElement('option');
+      opt.value = options[i][0];
+      opt.textContent = options[i][1];
+      select.appendChild(opt);
     }
-
-    // If urdu was selected but source switched to fawazahmed0, reset to english
-    if (currentVal === 'urdu' && source !== 'hadithapi') {
-      select.value = 'english';
-    } else {
-      select.value = currentVal;
-    }
+    select.value = currentVal;
   }
 
   function setSettingsStatus(id, msg, type) {
@@ -527,19 +944,14 @@
   }
 
   function validateHadithInputs() {
-    var valid = true;
-    var num = parseInt(document.getElementById('hadithNum').value, 10);
-
-    if (isNaN(num) || num < 1) {
-      showFieldError('hadithNum', 'hadithNumError', 'Hadith must be a positive number');
-      valid = false;
-    } else {
-      showFieldError('hadithNum', 'hadithNumError', '');
-    }
-
-    var btn = document.getElementById('btnLookupHadith');
-    btn.disabled = !valid;
-    return valid;
+    var raw = document.getElementById('hadithNum').value.trim();
+    var source = lookupSource();
+    var digitsOnly = source === 'fawazahmed0' || source === 'hadithapi';
+    var num = parseInt(raw, 10);
+    var ok = digitsOnly ? (/^\d{1,5}$/.test(raw) && num >= 1) : (SUNNAH_NUMBER_INPUT.test(raw) && num >= 1);
+    showFieldError('hadithNum', 'hadithNumError', ok ? '' : (digitsOnly ? 'Hadith must be a positive number' : 'Use a number like 1 or 8a'));
+    document.getElementById('btnLookupHadith').disabled = !ok;
+    return ok;
   }
 
   // ── Quran ──
@@ -580,6 +992,7 @@
           document.getElementById('quranPreview').style.display = 'block';
           document.getElementById('surah').value = ayahs[0].surahNum;
           clearStatus('quranStatus');
+          if (currentTafsir) showTafsir();
         })
         .withFailureHandler(function(err) {
           clearQuranLoading('btnLookupAyah');
@@ -611,6 +1024,7 @@
           document.getElementById('surah').value = data.surahNum;
           document.getElementById('ayah').value = data.ayahNum;
           clearStatus('quranStatus');
+          if (currentTafsir) showTafsir();
         })
         .withFailureHandler(function(err) {
           clearQuranLoading('btnLookupAyah');
@@ -702,87 +1116,95 @@
     var num = document.getElementById('hadithNum').value;
     setHadithLoading('btnLookupHadith', 'Looking up...');
     setStatus('hadithStatus', 'Loading...', '');
-
     google.script.run
       .withSuccessHandler(function(data) {
         clearHadithLoading('btnLookupHadith');
-        currentHadithData = data;
-        var refHTML = 'Hadith ' + capitalize(data.collection) + ' #' + data.hadithNum;
-        if (data.reference && data.reference.book) {
-          refHTML = refHTML + ' (Book ' + data.reference.book + ', #' + data.reference.hadith + ')';
-        }
-        var refEl = document.getElementById('hadithRef');
-        refEl.textContent = refHTML;
-
-        // Status badge
-        if (data.status) {
-          var badge = document.createElement('span');
-          var statusLower = data.status.toLowerCase();
-          var badgeClass = 'status-badge';
-          if (statusLower === 'sahih') {
-            badgeClass = badgeClass + ' sahih';
-          } else if (statusLower === 'hasan') {
-            badgeClass = badgeClass + ' hasan';
-          } else {
-            badgeClass = badgeClass + ' daif';
-          }
-          badge.className = badgeClass;
-          badge.textContent = data.status;
-          refEl.appendChild(badge);
-        }
-
-        document.getElementById('hadithArabic').textContent = data.arabic || '';
-
-        // Translation-aware display
-        var translationEl = document.getElementById('hadithTranslationText');
-        var translationText = '';
-        if (currentPrefs.hadithTranslation === 'urdu' && data.urdu) {
-          translationText = data.urdu;
-        } else if (currentPrefs.hadithTranslation === 'urdu' && !data.urdu) {
-          translationText = data.english || '';
-        } else {
-          translationText = data.english || '';
-        }
-        translationEl.textContent = translationText;
-
-        if (currentPrefs.showTranslation && translationText) {
-          translationEl.style.display = 'block';
-        } else {
-          translationEl.style.display = 'none';
-        }
-
-        document.getElementById('hadithPreview').style.display = 'block';
-        document.getElementById('hadithCollection').value = data.collection;
-        document.getElementById('hadithNum').value = data.hadithNum;
-        clearStatus('hadithStatus');
+        renderHadith(data);
       })
       .withFailureHandler(function(err) {
         clearHadithLoading('btnLookupHadith');
         setStatus('hadithStatus', err.message, 'error');
         document.getElementById('hadithPreview').style.display = 'none';
       })
-      .fetchHadith(col, num);
+      .fetchHadith(col, num, lookupSource() === 'auto' ? '' : lookupSource());
   }
 
-  function prevHadith() {
-    if (!currentHadithData || hadithLoading) return;
-    var num = currentHadithData.hadithNum - 1;
-    if (num < 1) return;
-    document.getElementById('hadithNum').value = num;
-    lookupHadith();
+  function renderHadith(data) {
+    currentHadithData = data;
+    var refEl = document.getElementById('hadithRef');
+    var fallbackNote = data.fallbackFrom ? ' (fallback from ' + data.fallbackFrom + ')' : '';
+    if (data.source === 'sunnah') {
+      refEl.textContent = data.collectionLabel + ' ' + data.hadithNum + (data.refDetail ? ' · ' + data.refDetail : '') + ' · ' + data.sourceLabel + fallbackNote;
+    } else {
+      var refText = 'Hadith ' + data.collectionLabel + ' #' + data.hadithNum;
+      if (data.reference && data.reference.book) {
+        refText = refText + ' (Book ' + data.reference.book + ', #' + data.reference.hadith + ')';
+      }
+      refEl.textContent = refText + ' · ' + data.sourceLabel + fallbackNote;
+    }
+    if (data.status) {
+      var badge = document.createElement('span');
+      badge.className = data.gradeColor ? 'status-badge' : 'status-badge neutral';
+      if (data.gradeColor) {
+        badge.style.backgroundColor = data.gradeColor;
+        badge.style.color = data.gradeTextColor;
+      }
+      badge.textContent = data.status;
+      refEl.appendChild(badge);
+    }
+
+    document.getElementById('hadithArabic').textContent = data.arabic || '';
+    var translitEl = document.getElementById('hadithTransliteration');
+    translitEl.textContent = data.transliteration || '';
+    translitEl.style.display = data.transliteration ? 'block' : 'none';
+
+    var translationEl = document.getElementById('hadithTranslationText');
+    var translationText = (currentPrefs.hadithTranslation === 'urdu' && data.urdu) ? data.urdu : (data.english || '');
+    translationEl.textContent = translationText;
+    translationEl.style.display = (currentPrefs.showTranslation && translationText) ? 'block' : 'none';
+
+    var noteEl = document.getElementById('hadithNote');
+    noteEl.textContent = data.note || '';
+    noteEl.style.display = data.note ? 'block' : 'none';
+
+    document.getElementById('hadithPreview').style.display = 'block';
+    document.getElementById('hadithCollection').value = data.collection;
+    document.getElementById('hadithNum').value = data.hadithNum;
+    document.getElementById('btnPrevHadith').disabled = String(data.hadithNum) === '1';
+    if (data.resolvedFrom) {
+      setStatus('hadithStatus', resolvedMessage(data), 'success');
+    } else {
+      clearStatus('hadithStatus');
+    }
   }
 
-  function nextHadith() {
-    if (!currentHadithData || hadithLoading) return;
-    var num = currentHadithData.hadithNum + 1;
-    document.getElementById('hadithNum').value = num;
-    lookupHadith();
+  function resolvedMessage(data) {
+    var found = 'Found ' + data.collectionLabel + ' ' + data.hadithNum;
+    if (String(data.hadithNum).indexOf(',') !== -1) return found + ' (sunnah.com combines these numbers)';
+    return found + ' (sunnah.com splits ' + data.resolvedFrom + ' into lettered parts)';
   }
+
+  function stepHadith(direction, btnId) {
+    if (!currentHadithData || hadithLoading) return;
+    setHadithLoading(btnId, 'Loading...');
+    setStatus('hadithStatus', 'Loading...', '');
+    google.script.run
+      .withSuccessHandler(function(data) {
+        clearHadithLoading(btnId);
+        renderHadith(data);
+      })
+      .withFailureHandler(function(err) {
+        clearHadithLoading(btnId);
+        setStatus('hadithStatus', err.message, 'error');
+      })
+      .fetchAdjacentHadith(currentHadithData.collection, String(currentHadithData.hadithNum), direction, currentHadithData.source);
+  }
+
+  function prevHadith() { stepHadith(-1, 'btnPrevHadith'); }
+  function nextHadith() { stepHadith(1, 'btnNextHadith'); }
 
   function insertHadith() {
     if (!currentHadithData || hadithLoading) return;
-    var col = document.getElementById('hadithCollection').value;
-    var num = document.getElementById('hadithNum').value;
     setHadithLoading('btnInsertHadith', 'Inserting...');
     setStatus('hadithStatus', 'Inserting...', '');
 
@@ -795,22 +1217,93 @@
         clearHadithLoading('btnInsertHadith');
         setStatus('hadithStatus', err.message, 'error');
       })
-      .insertHadithAtCursor(col, num);
+      .insertHadithAtCursor(currentHadithData.collection, String(currentHadithData.hadithNum), currentHadithData.source);
   }
 
-  // ── Scanner ──
+  // ── Replace All Tags ──
 
-  function scanDoc() {
-    setLoading('btnScanReplace', 'Scanning...');
+  function nextDelayMs(lastStartMs, nowMs, cached) {
+    if (cached) return 0;
+    return Math.max(0, lastStartMs + TAG_PACING_MS - nowMs);
+  }
+
+  function startTagRun() {
+    if (tagRun) return;
+    tagRun = { tags: [], index: 0, replaced: 0, skipped: [], cancelled: false, lastStartMs: 0, fallbackCount: 0 };
+    document.getElementById('btnScanReplace').disabled = true;
+    document.getElementById('tagRunPanel').className = 'tag-run visible';
+    document.getElementById('btnCancelTags').style.display = 'inline-block';
+    document.getElementById('tagSummary').textContent = '';
+    setTagProgress(0, 0, 'Scanning document...');
     google.script.run
-      .withSuccessHandler(function() {
-        clearLoading('btnScanReplace');
+      .withSuccessHandler(function(tags) {
+        tagRun.tags = tags;
+        processNextTag();
       })
       .withFailureHandler(function(err) {
-        clearLoading('btnScanReplace');
-        alert(err.message);
+        finishTagRun(err.message);
       })
-      .scanAndReplace();
+      .listTags();
+  }
+
+  function processNextTag() {
+    if (!tagRun) return;
+    if (tagRun.cancelled || tagRun.index >= tagRun.tags.length) {
+      finishTagRun('');
+      return;
+    }
+    var item = tagRun.tags[tagRun.index];
+    setTagProgress(tagRun.index, tagRun.tags.length, 'Processing ' + (tagRun.index + 1) + ' / ' + tagRun.tags.length);
+    tagRun.lastStartMs = Date.now();
+    google.script.run
+      .withSuccessHandler(function(result) {
+        if (result.status === 'throttled') {
+          setTimeout(processNextTag, result.retryAfterMs);
+          return;
+        }
+        if (result.status === 'replaced') {
+          tagRun.replaced += result.replaced;
+          if (result.fallback) tagRun.fallbackCount++;
+        } else {
+          tagRun.skipped.push(item.tag + ' — ' + result.reason);
+        }
+        tagRun.index++;
+        setTimeout(processNextTag, nextDelayMs(tagRun.lastStartMs, Date.now(), result.cached));
+      })
+      .withFailureHandler(function(err) {
+        tagRun.skipped.push(item.tag + ' — ' + err.message);
+        tagRun.index++;
+        setTimeout(processNextTag, nextDelayMs(tagRun.lastStartMs, Date.now(), false));
+      })
+      .replaceTag(item.tag);
+  }
+
+  function cancelTagRun() {
+    if (tagRun) tagRun.cancelled = true;
+  }
+
+  function finishTagRun(errorMessage) {
+    var run = tagRun;
+    tagRun = null;
+    document.getElementById('btnScanReplace').disabled = false;
+    document.getElementById('btnCancelTags').style.display = 'none';
+    var lines = [];
+    if (errorMessage) {
+      lines.push(errorMessage);
+    } else if (!run.tags.length) {
+      lines.push('No tags found.');
+    } else {
+      lines.push((run.cancelled ? 'Cancelled: ' : 'Done: ') + run.replaced + ' replaced, ' + run.skipped.length + ' skipped');
+      if (run.fallbackCount > 0) lines.push(run.fallbackCount + ' used the fallback source.');
+      lines = lines.concat(run.skipped);
+    }
+    setTagProgress(run.index, run.tags.length, '');
+    document.getElementById('tagSummary').textContent = lines.join('\n');
+  }
+
+  function setTagProgress(done, total, text) {
+    document.getElementById('tagProgressBar').style.width = (total ? Math.round(done / total * 100) : 0) + '%';
+    document.getElementById('tagProgressText').textContent = text;
   }
 
   // ── Helpers ──
@@ -824,8 +1317,6 @@
   function clearStatus(id) {
     document.getElementById(id).style.display = 'none';
   }
-  function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
-
   // ── Initialize ──
   loadSettings();
 </script>

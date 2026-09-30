@@ -1,0 +1,23 @@
+title: "Quran & Hadith Importer"
+description: "Insert Quran ayahs, hadith, and tafsir into Google Docs, with Arabic, translation, grade, and source."
+url: "https://qhi.littlebluer.com"
+baseurl: ""
+
+developer: "NNJAsec LLC"
+contact_email: "inquiry@nnjasec.com"
+
+# Leave empty until the Marketplace listing is live. In Liquid, an empty
+# string is still truthy, so index.md's install button checks
+# `site.marketplace_url != ""`, not just presence.
+marketplace_url:
+
+# Populate with image filenames under assets/screenshots/ (also copy the
+# files there) to show the screenshots section on the home page.
+screenshots: []
+
+markdown: kramdown
+kramdown:
+  input: GFM
+
+exclude:
+  - README.md

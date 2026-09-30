@@ -1,69 +1,76 @@
-# Privacy Policy — Quran & Hadith for Google Docs
+# Privacy Policy — Quran & Hadith Importer
 
-**Last updated:** February 13, 2026
+**Last updated:** September 29, 2026
 
 ## Overview
 
-Quran & Hadith for Google Docs ("the Add-on") is a Google Docs add-on that lets users look up and insert Quran ayahs and Hadith references into their documents. It is developed and maintained by NNJAsec ("we", "us").
+Quran & Hadith Importer ("the Add-on") is a Google Docs add-on that lets users look up and insert Quran ayahs, hadith, and tafsir into their documents. It is developed and maintained by NNJAsec LLC ("we", "us").
 
-## Data We Collect
+## Summary
 
-**No personal data.** The Add-on does not collect, transmit, or share any personal information with us or any third party.
+- The Add-on has no servers of its own. It runs inside Google Docs on Google's Apps Script platform.
+- It reads your open document only to find your cursor and, when you run **Replace All Tags**, to find `/quran`, `/hadith`, and `/tafsir` tags. Document text is never sent anywhere.
+- It sends only the reference you asked for (for example, `bukhari 1` or `2:255`) to the text sources listed below.
+- It does not collect personal information, and it uses no cookies, analytics, or tracking.
 
-## Data We Store Locally
+## Google user data
 
-The Add-on stores your preferences using Google Apps Script's `PropertiesService` (per-user, within Google's infrastructure). This includes:
+### What the Add-on accesses
 
-- **Translation preferences** (e.g., which Quran translation edition, hadith translation language)
-- **Hadith source selection** (fawazahmed0 or hadithapi.com)
-- **hadithapi.com API key** (if you choose to use that source)
+The Add-on requests these Google OAuth scopes:
 
-This data is stored in your Google account's script properties, not on our servers. Only you and the Add-on can access it.
+| Scope | What the Add-on does with it |
+|-------|------------------------------|
+| `documents.currentonly` | Works only on the document it's open in. Reads the cursor position to insert text there. When you run **Replace All Tags** (or **Scan & Replace Tags** from the menu), reads the document's text to find tags and replaces each tag with the text it asks for. |
+| `script.external_request` | Requests Quran, hadith, and tafsir text from the sources listed under "Text sources". |
+| `script.container.ui` | Shows the sidebar and the add-on menu inside Google Docs. |
 
-## How the Add-on Works
+The Add-on can't open, list, or change any other file in your Google Drive.
 
-- The Add-on runs entirely within your Google Docs environment.
-- When you look up a Quran ayah or Hadith, the Add-on makes API requests to third-party services to retrieve the text:
-  - **Al Quran Cloud API** (`api.alquran.cloud`) — for Quran text
-  - **fawazahmed0 Hadith API** via jsDelivr (`cdn.jsdelivr.net`) — for Hadith text (default source, no API key required)
-  - **hadithapi.com** (`hadithapi.com`) — optional alternative Hadith source (requires a free API key you obtain directly from hadithapi.com)
-- These requests contain only the surah/ayah number or hadith collection/number you entered. If you use hadithapi.com, your API key is included in requests to that service. No other personal information is included.
-- Retrieved text is inserted directly into your Google Doc. No data is sent to or stored on our servers.
+### How the Add-on uses it
 
-## Google User Data
+- Document text is read in memory to find tags and is never stored, logged, or sent to us or to any text source.
+- The only data sent to a text source is the reference itself: a hadith collection and number, a surah and ayah, or a tafsir work and ayah.
+- The Add-on doesn't sell, share, or transfer Google user data, and doesn't use it for advertising.
 
-The Add-on requests the following Google OAuth scopes:
+### Limited Use
 
-| Scope | Purpose |
-|-------|---------|
-| `documents.currentonly` | Read and write content in the current Google Doc (to insert formatted text at your cursor) |
-| `script.external_request` | Make HTTP requests to the Quran and Hadith APIs listed above |
-| `script.container.ui` | Display the sidebar interface within Google Docs |
+The Add-on's use and transfer of information received from Google APIs adheres to the [Google API Services User Data Policy](https://developers.google.com/terms/api-services-user-data-policy), including the Limited Use requirements.
 
-The Add-on accesses your document **only** to insert text you explicitly request. It does not read, scan, or exfiltrate any existing document content beyond what is necessary to locate your cursor position.
+## What the Add-on stores
 
-## Data Storage
+Everything is stored inside Google's Apps Script services. We have no servers.
 
-The Add-on has no backend, no database, and no server-side storage of its own. User preferences are stored in Google Apps Script's `PropertiesService` within your Google account. It does not use cookies, analytics, or tracking of any kind.
+- Your preferences (sources, translations, tafsir and grade settings, and your hadithapi.com key if you add one), in your Google account's Apps Script storage.
+- Short-lived caches: retrieved text for up to 6 hours, and counters that pace requests. They contain nothing about you.
+- Error codes from failed requests, in the developer's logs. No document text.
 
-## Third-Party Services
+## Text sources
 
-The Add-on communicates with the following third-party APIs solely to retrieve religious text:
+To get text, the Add-on sends only the reference you asked for (for example, `bukhari 1` or `2:255`) to one of these services:
 
-- [Al Quran Cloud](https://alquran.cloud) — [Privacy Policy](https://alquran.cloud/privacy-policy)
-- [jsDelivr CDN](https://www.jsdelivr.com) — [Privacy Policy](https://www.jsdelivr.com/privacy-policy-jsdelivr-net)
-- [hadithapi.com](https://hadithapi.com) (optional, user-enabled) — contact hadithapi.com for their privacy policy
+- [Al Quran Cloud](https://alquran.cloud): Quran text and translations
+- [sunnah.com](https://sunnah.com): hadith (the default)
+- [fawazahmed0 Hadith API](https://github.com/fawazahmed0/hadith-api), served by [jsDelivr](https://www.jsdelivr.com): hadith
+- [hadithapi.com](https://hadithapi.com): hadith, only if you add your own API key, which is sent with each request
+- [tafsir.app](https://tafsir.app) and [quran.com](https://quran.com): tafsir
 
-We do not control these services and recommend reviewing their privacy policies.
+Your settings and tag prefixes decide which service gets a request. If you turn on a fallback source, the same reference may also go to that source. Each service has its own privacy practices.
 
-## Children's Privacy
+## Removing your data
+
+- To remove your hadithapi.com key, clear the **API Key** field and click **Save Settings**.
+- To revoke the Add-on's access to your Google account, open [Third-party apps & services](https://myaccount.google.com/connections) in your Google Account and remove **Quran & Hadith Importer**. After that, the Add-on can't run for you or read your saved preferences.
+- Cached text expires on its own within 6 hours.
+
+## Children's privacy
 
 The Add-on does not knowingly collect any information from anyone, including children under 13.
 
-## Changes to This Policy
+## Changes to this policy
 
-We may update this policy from time to time. Changes will be posted at this URL with an updated date.
+We may update this policy. Changes are posted at this URL with a new "Last updated" date.
 
 ## Contact
 
-For questions about this privacy policy, contact us at **inquiry@nnjasec.com**.
+For questions about this privacy policy, email **inquiry@nnjasec.com**.
